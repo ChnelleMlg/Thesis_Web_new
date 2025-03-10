@@ -1,0 +1,384 @@
+    /* =================================
+    Import Fonts
+    ================================= */
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+
+
+    /* =================================
+    Global Styles
+    ================================= */
+    body {
+        height: 100%;
+        margin: 0; 
+        padding: 0;
+        font-family: Arial, sans-serif;
+        box-sizing: border-box;
+    }
+    
+    /* Add top margin to offset fixed navigation */
+    body {
+        margin-top: 50px;
+    }
+
+
+    /* =================================
+    Footer Styles
+    ================================= */
+    footer {
+        background-color: #144a30;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    /* Container for the footer columns */
+    .footer-section {
+        display: flex;
+        justify-content: center; 
+        align-items: center;     
+        gap: 10px;               
+        flex-wrap: wrap;         
+    }
+    
+    /* Individual footer columns */
+    .footer-column {
+        flex: none;
+        min-width: 200px;        
+    }
+    
+    /* Styling for the horizontal rule */
+    footer hr {
+        border: 1px solid #fff;
+        margin: 20px 0;
+    }
+    
+    /* Footer copyright text */
+    .footer-copy {
+        margin: 0;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .footer-section {
+        flex-direction: column;
+        gap: 20px; 
+        }
+    }
+
+
+    /* Navigation Bar Styles */
+    nav {
+        background-color: #144a30;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;  
+        padding: 5px 10px;
+        z-index: 2000;
+        box-sizing: border-box;
+    }
+    
+    /* Flex container spanning the full width */
+    .nav-container {
+        display: flex;
+        justify-content: space-between; 
+        align-items: center;
+        width: 100%;
+    }
+    
+    /* Logo Styling */
+    .nav-logo a img {
+        height: 40px; 
+        width: auto;
+        display: block;
+    }
+    
+    /* Navigation Links Container */
+    .nav-links {
+        display: flex;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Each navigation link item */
+    .nav-links li {
+        margin-left: 10px;  
+    }
+    
+    /* Link styles */
+    .nav-links a {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+    }
+    
+    /* Smaller icon images for links */
+    .nav-links img {
+        max-height: 35px;
+        width: auto;
+    }
+    
+    /* Navigation Link Tooltip */
+    nav ul li a {
+        position: relative;
+        display: inline-block;
+    }
+    nav ul li a .tooltip {
+        display: none;
+        position: absolute;
+        top: 30px; 
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #555;
+        color: white;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        white-space: nowrap;
+        z-index: 10;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        margin-top: 2px;
+    }
+    nav ul li a:hover .tooltip {
+        display: block;
+        opacity: 1;
+    }
+
+    /* Navigation Tooltips (for nav links) */
+    nav ul li a {
+        position: relative;
+        display: inline-block;
+    }
+    nav ul li a .tooltip {
+        display: none;
+        position: absolute;
+        top: 35px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #555;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 10px;
+        white-space: nowrap;
+        z-index: 10;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        margin-top: 5px;
+    }
+    nav ul li a:hover .tooltip {
+        display: block;
+        opacity: 1;
+    }
+
+
+    /* =================================
+    Utility Classes for Images & Tooltips
+    ================================= */
+    .small-logo {
+        height: 60px;
+        width: auto;
+        display: block;
+    }
+    .collaborator {
+        position: relative;
+        display: inline-block;
+    }
+    .tooltip {
+        display: none;
+        position: absolute;
+        top: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #555;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 10px;
+        white-space: nowrap;
+        z-index: 10;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        margin-top: 5px;
+    }
+    .collaborator:hover .tooltip {
+        display: block;
+        opacity: 1;
+    }
+
+
+    /* =================================
+    Container & Background Styles
+    ================================= */
+    /* Outer container – using block for full width */
+    #container {
+        display: block;
+        width: 100%;
+        /* Uncomment the following if you need a full-height flex container:
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 50px);
+        */
+    }
+    .image-background {
+        background-image: url('agri.jpg');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        text-align: center;
+        padding: 100px 20px;
+        min-height: 400px;
+    }
+    .color-background {
+        background-color: #e7e9e0;
+        color: white;
+        text-align: center;
+    }
+
+
+    /* =================================
+    Typography
+    ================================= */
+    h1 {
+        margin-top: 30px;
+        margin-bottom: 40px;
+        font-size: 2.5em;
+        text-shadow: 2px 2px 5px black;
+        font-family: 'Montserrat', sans-serif;
+    }
+    @font-face {
+        font-family: 'Garet Book';
+        src: url('path/to/GaretBook-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+    h2 {
+        font-size: 20px;
+        font-family: 'Montserrat';
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+
+    /* =================================
+    Two-Column Section Layouts
+    ================================= */
+    .two-column-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 50px;
+        height: 300px;
+    }
+    .column {
+        flex: 1;
+        padding: 20px;
+    }
+    .left-column {
+        text-align: left;
+    }
+    .left-column h3 {
+        text-align: left;
+        font-family: 'Montserrat';
+        text-shadow: 1px 1px 1px rgb(104, 100, 100);
+        font-size: xx-large;
+        font-weight: bolder;
+    }
+    .right-column img {
+        padding-left: 30px;
+        width: 100%;
+        max-width: 500px;
+        height: auto;
+        border-radius: 10px;
+    }
+    .two2-column-section {
+        display: flex;
+        gap: 50px;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    /* Reset padding/margin for columns in two2-column-section */
+    .left-column, .right-column {
+        flex: 1;
+        padding: 0;
+        margin: 0;
+    }
+
+
+    /* =================================
+    Button Styles
+    ================================= */
+    .learn-more-btn {
+        background-color: #144a30;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 16px;
+        margin-top: 10px;
+        transition: background-color 0.3s ease;
+        font-family: 'Montserrat';
+        font-weight: bold;
+    }
+    .learn-more-btn:hover {
+        background-color: #086838;
+    }
+
+
+    /* =================================
+    Sidebar & Content Layout
+    ================================= */
+    .content-container {
+        display: flex;
+        justify-content: flex-start;
+        align-items: stretch;
+        padding: 15px;
+        height: calc(100vh - 80px);
+    }
+    .sidebar {
+        width: 12%;
+        height: 100%;
+        background-color: #f4f4f4;
+        padding: 10px;
+        border-radius: 10px;
+        box-sizing: border-box;
+        box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .sidebar ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    .sidebar li {
+        margin: 10px 0;
+    }
+    .sidebar a {
+        text-decoration: none;
+        color: #0c3a2f;
+        font-weight: bold;
+    }
+    .sidebar a:hover {
+        color: #80db5c;
+    }
+    .sidebar a.active {
+        color: #ffb902;
+    }
+    .content {
+        width: 88%;
+        height: 100%;
+        padding: 20px;
+        background-color: #f4f4f4;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+        box-sizing: border-box;
+        margin-left: 20px;
+    }
+    .content-section {
+        display: none;
+    }
+    .content-section.active {
+        display: block;
+    }

@@ -1,0 +1,54 @@
+<!-- map_snippet.html -->
+<!-- Map Container -->
+<div class="folium-map" id="map_a8f68228628dd4abeda66c8b1b11129b" style="width:100%; height:100%;"></div>
+
+<!-- Map Initialization Script -->
+<script>
+  // Initialize the map and assign it to a global variable.
+  var map_a8f68228628dd4abeda66c8b1b11129b = L.map("map_a8f68228628dd4abeda66c8b1b11129b", {
+      center: [14.16667, 121.33333],
+      crs: L.CRS.EPSG3857,
+      zoom: 10,
+      zoomControl: true,
+      preferCanvas: false
+  });
+
+  // Add the tile layer.
+  var tileLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      minZoom: 0,
+      maxZoom: 20,
+      maxNativeZoom: 20,
+      noWrap: false,
+      attribution: "© OpenStreetMap contributors, © CartoDB",
+      subdomains: "abcd",
+      detectRetina: false,
+      tms: false,
+      opacity: 1
+  });
+  tileLayer.addTo(map_a8f68228628dd4abeda66c8b1b11129b);
+
+  // --- Load GeoJSON from static folder ---
+  // Use fetch to load fields_coordinates.geojson from the static folder.
+  fetch("{{ url_for('static', filename='fields_coordinates.geojson') }}")
+    .then(response => response.json())
+    .then(geojsonData => {
+      // Add the GeoJSON layer with some optional styling and popup.
+      L.geoJSON(geojsonData, {
+        onEachFeature: function(feature, layer) {
+          if (feature.properties && feature.properties.city) {
+            layer.bindPopup("City: " + feature.properties.city);
+          }
+        },
+        style: function(feature) {
+          // You can adjust the style as needed.
+          return {
+            color: "blue",
+            weight: 2,
+            fillOpacity: 0.5
+          };
+        }
+      }).addTo(map_a8f68228628dd4abeda66c8b1b11129b);
+    })
+    .catch(error => console.error('Error loading GeoJSON:', error));
+  // --- End Load GeoJSON ---
+</script>

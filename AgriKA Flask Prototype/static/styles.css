@@ -1,0 +1,608 @@
+/* ================================
+   Import Fonts
+   ================================ */
+   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+
+
+   /* ================================
+      Global Styles
+      ================================ */
+   body {
+       height: 100%;
+       margin: 0; /* Reset default margins */
+       padding: 0;
+       font-family: Arial, sans-serif;
+       box-sizing: border-box;
+   }
+   
+   /* Add top margin to offset fixed navigation */
+   body {
+       margin-top: 50px;
+   }
+
+   .dropdown-container {
+    position: relative;
+    display: inline-block;
+    width: 50%;
+}
+
+    /* ================================
+      Municipality Searchbar
+      ================================ */
+    #municipality-search {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    label[for="municipality-search"] {
+        font-family: 'Montserrat', sans-serif; 
+        font-size: 16px; 
+        font-weight: bold; 
+        color: #333; 
+    }
+    
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        width: 100%;
+        background: white;
+        border: 1px solid #ccc;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 10;
+    }
+
+    .dropdown-content option {
+        padding: 8px;
+        cursor: pointer;
+        display: block;
+    }
+
+    .dropdown-content option:hover {
+        background-color: #f0f0f0;
+    }
+   
+   /* ================================
+      Footer Styles
+      ================================ */
+    footer {
+        background-color: #144a30;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    /* Container for the footer columns */
+    .footer-section {
+        display: flex;
+        justify-content: center; 
+        align-items: center;     
+        gap: 10px;               
+        flex-wrap: wrap;         
+    }
+    
+    /* Individual footer columns */
+    .footer-column {
+        flex: none;
+        min-width: 200px;        
+    }
+    
+    /* Styling for the horizontal rule */
+    footer hr {
+        border: 1px solid #fff;
+        margin: 20px 0;
+    }
+    
+    /* Footer copyright text */
+    .footer-copy {
+        margin: 0;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .footer-section {
+        flex-direction: column;
+        gap: 20px; 
+        }
+    }
+
+   /* Navigation Bar Styles */
+    nav {
+        background-color: #144a30;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;  
+        padding: 5px 10px;
+        z-index: 2000;
+        box-sizing: border-box;
+    }
+    
+    /* Flex container spanning the full width */
+    .nav-container {
+        display: flex;
+        justify-content: space-between; 
+        align-items: center;
+        width: 100%;
+    }
+    
+    /* Logo Styling */
+    .nav-logo a img {
+        height: 40px; 
+        width: auto;
+        display: block;
+    }
+    
+    /* Navigation Links Container */
+    .nav-links {
+        display: flex;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Each navigation link item */
+    .nav-links li {
+        margin-left: 10px;  
+    }
+    
+    /* Link styles */
+    .nav-links a {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+    }
+    
+    /* Smaller icon images for links */
+    .nav-links img {
+        max-height: 35px;
+        width: auto;
+    }
+    
+    /* Navigation Link Tooltip */
+    nav ul li a {
+        position: relative;
+        display: inline-block;
+    }
+    nav ul li a .tooltip {
+        display: none;
+        position: absolute;
+        top: 30px; 
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #555;
+        color: white;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        white-space: nowrap;
+        z-index: 10;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        margin-top: 2px;
+    }
+    nav ul li a:hover .tooltip {
+        display: block;
+        opacity: 1;
+    }
+  
+ 
+    /* ================================
+        Tooltip for Collaborators
+        ================================ */
+    .collaborator {
+        position: relative;
+        display: inline-block;
+    }
+    .tooltip {
+        display: none;
+        position: absolute;
+        top: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #555;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 10px;
+        white-space: nowrap;
+        z-index: 10;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        margin-top: 5px;
+    }
+    .collaborator:hover .tooltip {
+        display: block;
+        opacity: 1;
+    }
+   
+   
+   /* ================================
+      Container & Layout Styles
+      ================================ */
+   #container {
+       display: flex;
+       justify-content: flex-start;
+       align-items: stretch;
+       padding: 15px;
+       margin-top: 50px;
+       height: calc(100vh - 50px);
+   }
+   
+   
+   /* ================================
+      Form & Chart Elements
+      ================================ */
+   /* Province Dropdown */
+   #province-dropdown {
+       padding: 10px;
+       margin-bottom: 20px;
+       border: 1px solid #ccc;
+       width: 100%;
+   }
+   
+   /* Bar Chart Container */
+   #bar-chart-container {
+       height: 450px;
+       margin-bottom: 20px;
+       width: 100%;
+   }
+   
+   /* Table Container */
+   #table-container {
+       margin-top: 10px;
+   }
+   #data-table {
+       width: 100%;
+       border-collapse: collapse;
+       text-align: left;
+   }
+   #data-table th,
+   #data-table td {
+       padding: 8px;
+       border: 1px solid #ddd;
+   }
+   #data-table th {
+       background-color: #f2f2f2;
+   }
+   
+   
+   /* ================================
+      Background Sections
+      ================================ */
+   /* Image Background Section */
+   .image-background {
+       background-image: url('agri.jpg');
+       background-size: cover;
+       background-position: center;
+       color: white;
+       text-align: center;
+       padding: 100px 20px;
+       min-height: 400px;
+   }
+   
+   /* Solid Color Background Section */
+   .color-background {
+       background-color: #e7e9e0;
+       color: white;
+       text-align: center;
+       padding: 50px 20px;
+   }
+   
+   
+   /* ================================
+      Heading Styles
+      ================================ */
+   h1 {
+       margin-top: 30px;
+       margin-bottom: 40px;
+       font-size: 2.5em;
+       text-shadow: 2px 2px 5px black;
+       font-family: 'Montserrat', sans-serif;
+   }
+   
+   /* Custom Font Face for H2 */
+   @font-face {
+       font-family: 'Garet Book';
+       src: url('path/to/GaretBook-Regular.ttf') format('truetype');
+       font-weight: normal;
+       font-style: normal;
+   }
+   h2 {
+       font-size: 20px;
+       margin-bottom: 20px;
+       text-shadow: 2px 2px 5px black;
+       font-family: 'Garet Book', sans-serif;
+   }
+   
+   
+   /* ================================
+      Button Styles
+      ================================ */
+   /* Call-To-Action Button */
+   .cta-button {
+       background-color: #1ebe33;
+       color: white;
+       padding: 15px 30px;
+       border: none;
+       border-radius: 5px;
+       font-size: 16px;
+       cursor: pointer;
+       text-transform: uppercase;
+       margin-top: 20px;
+       transition: background-color 0.3s ease;
+       text-decoration: none;
+   }
+   .cta-button:hover {
+       background-color: #046419;
+   }
+   
+   
+   /* ================================
+      Leaflet Map Overrides
+      ================================ */
+   .leaflet-top,
+   .leaflet-bottom {
+       z-index: 1100 !important;
+   }
+   
+   
+   /* ================================
+      Styled Table (Yield Table)
+      ================================ */
+   #yield-table-container {
+       max-width: auto;
+       background: #ffffff;
+       border-radius: 10px;
+       box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+   }
+   
+   .styled-table {
+       width: 100%;
+       border-collapse: collapse;
+       font-family: 'Montserrat', sans-serif;
+   }
+   .styled-table thead {
+       background-color: #0c3a2f !important;
+       color: white !important;
+       text-align: left !important;
+   }
+   .styled-table thead th {
+       background-color: #144a30 !important;
+       color: white !important;
+   }
+   .styled-table th,
+   .styled-table td {
+       padding: 12px;
+       border-bottom: 1px solid #ddd;
+   }
+   .styled-table tbody tr:nth-child(even) {
+       background-color: #f3f3f3;
+   }
+   .styled-table tbody tr:hover {
+       background-color: #ddd;
+   }
+   .styled-table tbody td {
+       font-size: 16px;
+       color: #333;
+   }
+   
+   
+   /* ================================
+      Legend Styles
+      ================================ */
+   #legend-container {
+       display: flex;
+       justify-content: center;
+       align-items: center;
+       gap: 50px;
+       width: 100%;
+   }
+   .legend-item {
+       display: flex;
+       align-items: center;
+       gap: 8px;
+       font-size: 16px;
+       font-weight: bold;
+       color: #333;
+   }
+   .legend-box {
+       width: 20px;
+       height: 20px;
+       border-radius: 4px;
+   }
+   
+   
+   /* ================================
+      Content & Map Containers
+      ================================ */
+   #content-container {
+       margin-left: 20px;
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       width: 60%;
+       height: calc(100vh - 80px);
+   }
+   
+   #bottom-container {
+       background: #f8f9fa;
+       padding: 15px;
+       border-radius: 10px;
+       box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+       width: 100%;
+       text-align: center;
+       overflow: hidden;
+   }
+
+   #historical-bar-chart-container {
+    width: 100%;
+    height: 1000px;
+    overflow-y: auto;
+    margin: 20px auto;
+    background-color: #e2dcdc;
+    border: 1px solid #ddd;
+    padding: 10px;
+    }   
+
+   
+   /* Map Container */
+   #map-container {
+       margin-bottom: 15px;
+       width: 100%;
+       flex-grow: 1;
+       border-radius: 10px;
+       box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+       box-sizing: border-box;
+       overflow: hidden;
+       display: flex;
+       justify-content: center;
+   }
+   #map {
+       width: 100%;
+       height: 100%;
+   }
+   
+   
+   /* ================================
+      Sidebar Styles
+      ================================ */
+   #sidebar-container {
+       display: flex;
+       flex-direction: column;
+       width: 40%;
+       height: calc(100vh - 80px);
+   }
+   #sidebar-top-container {
+       background: #144a30;
+       color: white;
+       padding: 5px;
+       border-radius: 10px;
+       margin-bottom: 15px;
+       box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+       width: 100%;
+       text-align: center;
+       display: flex;
+       justify-content: space-evenly;
+       align-items: center;
+   }
+   #sidebar {
+       flex-grow: 1;
+       overflow-y: auto;
+       background-color: #f4f4f4;
+       display: flex;
+       flex-direction: column;
+       justify-content: flex-start;
+       box-sizing: border-box;
+       border-right: 1px solid #ddd;
+       padding: 10px;
+       border-radius: 10px;
+       box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.3);
+   }
+   
+   
+   /* ================================
+      Toggle & Dropdown Controls
+      ================================ */
+   /* Toggle Container */
+   #toggle-container {
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       gap: 15px;
+       width: 100%;
+       margin-bottom: 5px;
+   }
+   /* Toggle Buttons Container */
+   #toggle-buttons {
+       display: flex;
+   }
+   
+   /* Historical Data Toggle Button */
+   .hist-toggle-btn {
+       background: none;
+       border: none;
+       padding: 12px 20px;
+       height: 100%;
+       border-radius: 5px;
+       cursor: pointer;
+       font-weight: bold;
+       transition: color 0.3s ease;
+       text-align: center;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+   }
+   
+   /* Realtime Button Styles */
+   .realtime-btn {
+       flex: 1;
+       font-size: 20px;
+       color: gray;
+   }
+   .realtime-btn:hover {
+       color: #ffb902;
+   }
+   .realtime-btn.active {
+       color: #ffb902;
+   }
+   
+   /* Graph Button Styles */
+   .graph-btn {
+       font-size: 14px;
+       color: gray;
+   }
+   .graph-btn:hover {
+       color: #69a436;
+   }
+   .graph-btn.active {
+       color: #69a436;
+   }
+   
+   /* Sort Dropdown Styles */
+   #sort-dropdown {
+       padding: 8px 7px;
+       font-size: 14px;
+       cursor: pointer;
+       color: gray;
+       height: 40px;
+       font-weight: bold;
+       border: none;
+       outline: none;
+       background: transparent;
+   }
+   #sort-dropdown option[disabled] {
+       color: gray;
+   }
+   
+   /* Graph Toggle Dropdown Styles */
+   #graph-toggle-dropdown {
+       padding: 8px 7px;
+       font-size: 14px;
+       cursor: pointer;
+       color: gray;
+       height: 40px;
+       font-weight: bold;
+       border: none;
+       outline: none;
+       background: transparent;
+   }
+   #graph-dropdown option[disabled] {
+       color: gray;
+   }
+   
+   /* ================================
+      Miscellaneous
+      ================================ */
+   /* Small Logo */
+   .small-logo {
+       height: 60px;
+       width: auto;
+       display: block;
+   }
+   
