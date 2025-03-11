@@ -152,6 +152,8 @@ def generate_yield_chart(municipalities, yields):
     plt.close()
 
     return chart_url
+
+
 #### REAL TIME PART #####
 def get_phase(day, month):
     """
@@ -190,44 +192,40 @@ def get_phase(day, month):
     # Fallback (shouldn't happen if date is valid)
     return None
 
+
 def store_prediction_result(result):
-    # Extract values from the prediction result
     city = result.get('City')
-    day = result.get('Day')
-    month = result.get('Month')
-    predicted_yield = result.get('Yield')
-    
-    # Calculate the phase based on day and month
+    day = int(result.get('Day'))
+    month = int(result.get('Month'))
+    predicted_yield = float(result.get('Predicted Yield'))  # ✅ Convert numpy.float32 to Python float
     phase = get_phase(day, month)
-    
-    # Use current year for the prediction date
     current_year = datetime.now().year
     date_str = f"{current_year}-{month:02d}-{day:02d}"
-    
-    # Look up ID_rice from rice_field based on the city (you may need additional filtering)
+
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT ID_rice FROM rice_field WHERE municipality = %s", (city,))
-    result_row = cursor.fetchone()
-    if not result_row:
-        raise Exception(f"No rice_field record found for municipality '{city}'")
-    id_rice = result_row[0]
     
-    # Insert the result into the real_time table
-    insert_query = """
-        INSERT INTO real_time (ID_rice, date, phase, yield)
-        VALUES (%s, %s, %s, %s)
-    """
     try:
-        cursor.execute(insert_query, (id_rice, date_str, phase, predicted_yield))
-        conn.commit()
-        print("Prediction result inserted successfully.")
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT ID_rice FROM rice_field WHERE municipality = %s", (city,))
+            result_rows = cursor.fetchall()  # ✅ Fetch all results
+            if not result_rows:
+                print(f"Warning: No rice_field record found for '{city}'. Skipping insertion.")
+                return
+            id_rice = result_rows[0][0]
+
+            insert_query = """
+                INSERT INTO real_time (ID_rice, date, phase, yield)
+                VALUES (%s, %s, %s, %s)
+            """
+            cursor.execute(insert_query, (id_rice, date_str, phase, predicted_yield))
+            conn.commit()
+            print("Prediction result inserted successfully.")
     except Exception as e:
         conn.rollback()
         print("Error inserting prediction result:", e)
     finally:
-        cursor.close()
         conn.close()
+
 
 
 ##### HISTORICAL #####

@@ -4,6 +4,8 @@ import os
 import json
 import re
 from datetime import datetime, timedelta
+from Controller import store_prediction_result
+
 
 # Third-party imports
 import tensorflow as tf
@@ -40,7 +42,7 @@ from tensorflow.keras.applications.resnet50 import preprocess_input
 def load_and_process_geojson(filepath):
     """Loads a GeoJSON file, normalizes city names, and organizes polygons by municipality."""
 
-    # Load GeoJSON data
+    # Load GeoJSON dataz
     with open(filepath, "r") as f:
         geojson_data = json.load(f)
 
@@ -698,13 +700,25 @@ for entry in merged_data:
         # Predict
         predicted_yield = model.predict(features)[0][0]
 
-        # Store result
-        yield_results.append({
-            "City": city,
-            "Day": day,
-            "Month": month,
-            "Predicted Yield": predicted_yield
-        })
+        # # Store result
+        # yield_results.append({
+        #     "City": city,
+        #     "Day": day,
+        #     "Month": month,
+        #     "Predicted Yield": predicted_yield
+        # })
+
+        # Store result in the list
+        result = {
+        "City": city,
+        "Day": day,
+        "Month": month,
+        "Predicted Yield": predicted_yield
+        }
+        yield_results.append(result)
+        # Call store_prediction_result(result) to insert into DB
+        store_prediction_result(result)
+        
     except Exception as e:
         print(f"Error processing entry {entry}: {e}")
 
