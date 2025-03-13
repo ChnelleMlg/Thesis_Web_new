@@ -73,40 +73,10 @@
                 <div id="realtime-content">
                     <div id="toggle-container">
                         <!-- Municipality Search -->
-                        <label for="municipality-search">Select Municipality:</label>
                         <div class="dropdown-container">
                             <input type="text" id="municipality-search" placeholder="Select municipality" onfocus="showDropdown()" oninput="filterDropdown()" onkeydown="navigateDropdown(event)" autocomplete="off">
-                            <div id="municipality-dropdown" class="dropdown-content">
-                                <option value="ALAMINOS" onclick="selectOption(event)">ALAMINOS</option>
-                                <option value="BAY" onclick="selectOption(event)">BAY</option>
-                                <option value="CABUYAO" onclick="selectOption(event)">CABUYAO</option>
-                                <option value="CALAUAN" onclick="selectOption(event)">CALAUAN</option>
-                                <option value="CAVINTI" onclick="selectOption(event)">CAVINTI</option>
-                                <option value="BIÑAN" onclick="selectOption(event)">BIÑAN</option>
-                                <option value="CALAMBA" onclick="selectOption(event)">CALAMBA</option>
-                                <option value="SANTA ROSA" onclick="selectOption(event)">SANTA ROSA</option>
-                                <option value="FAMY" onclick="selectOption(event)">FAMY</option>
-                                <option value="KALAYAAN" onclick="selectOption(event)">KALAYAAN</option>
-                                <option value="LILIW" onclick="selectOption(event)">LILIW</option>
-                                <option value="LOS BAÑOS" onclick="selectOption(event)">LOS BAÑOS</option>
-                                <option value="LUISIANA" onclick="selectOption(event)">LUISIANA</option>
-                                <option value="LUMBAN" onclick="selectOption(event)">LUMBAN</option>
-                                <option value="MABITAC" onclick="selectOption(event)">MABITAC</option>
-                                <option value="MAGDALENA" onclick="selectOption(event)">MAGDALENA</option>
-                                <option value="MAJAYJAY" onclick="selectOption(event)">MAJAYJAY</option>
-                                <option value="NAGCARLAN" onclick="selectOption(event)">NAGCARLAN</option>
-                                <option value="PAETE" onclick="selectOption(event)">PAETE</option>
-                                <option value="PAGSANJAN" onclick="selectOption(event)">PAGSANJAN</option>
-                                <option value="PAKIL" onclick="selectOption(event)">PAKIL</option>
-                                <option value="PANGIL" onclick="selectOption(event)">PANGIL</option>
-                                <option value="PILA" onclick="selectOption(event)">PILA</option>
-                                <option value="RIZAL" onclick="selectOption(event)">RIZAL</option>
-                                <option value="SAN PABLO" onclick="selectOption(event)">SAN PABLO</option>
-                                <option value="SANTA CRUZ" onclick="selectOption(event)">SANTA CRUZ</option>
-                                <option value="SANTA MARIA" onclick="selectOption(event)">SANTA MARIA</option>
-                                <option value="SINILOAN" onclick="selectOption(event)">SINILOAN</option>
-                                <option value="VICTORIA" onclick="selectOption(event)">VICTORIA</option>
-                            </div>
+                            <span id="clear-search" onclick="clearSearch()">❌</span>
+                            <div id="municipality-dropdown" class="dropdown-content"></div>
                         </div>
 
                         <!-- Graph Toggle Dropdown for Real-Time View -->
@@ -136,10 +106,10 @@
                                 </tr>
                            </thead>
                            <tbody>
-                                {% for municipality, yield_value in yield_data %}
+                                {% for row in realtime_yield_data %}
                                 <tr>
-                                    <td>{{ municipality }}</td>
-                                    <td>{{ yield_value }}</td>
+                                    <td>{{ row.municipality }}</td>
+                                    <td>{{ row.yield }}</td>
                                 </tr>
                                 {% endfor %}
                            </tbody>
@@ -256,477 +226,211 @@
 </body>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let currentIndex = -1;
-    
-        // --- Searchbar & Dropdown Functions --- //
-        function showDropdown() {
-            document.getElementById('municipality-dropdown').style.display = 'block';
-        }
-    
-        function filterDropdown() {
-            let input = document.getElementById('municipality-search').value.toUpperCase();
-            let dropdown = document.getElementById('municipality-dropdown');
-            let options = dropdown.getElementsByTagName('option');
-            let hasMatches = false;
-            for (let i = 0; i < options.length; i++) {
-                let txtValue = options[i].textContent || options[i].innerText;
-                if (txtValue.toUpperCase().indexOf(input) > -1) {
-                    options[i].style.display = '';
-                    hasMatches = true;
-                } else {
-                    options[i].style.display = 'none';
-                }
-            }
-            dropdown.style.display = (hasMatches || input === '') ? 'block' : 'none';
-            currentIndex = -1;
-            
-            let sortType = document.getElementById("sort-dropdown").value || "default";
-            updateGraphAndTable(sortType);
-            if (input === "") {
-                resetMapStyles();
-            }
-        }
-    
-        function filterTable() {
-            let input = document.getElementById('municipality-search').value.toUpperCase();
-            let tables = document.querySelectorAll('.data-table');
-            tables.forEach(table => {
-                let rows = table.getElementsByTagName('tr');
-                for (let i = 0; i < rows.length; i++) {
-                    let cell = rows[i].getElementsByTagName('td')[0];
-                    if (cell) {
-                        let txtValue = cell.textContent || cell.innerText;
-                        rows[i].style.display = txtValue.toUpperCase().indexOf(input) > -1 ? "" : "none";
-                    }
-                }
-            });
-        }
-    
-        function selectOption(event) {
-            let selectedMunicipality = event.target.textContent;
-            document.getElementById('municipality-search').value = selectedMunicipality;
-            document.getElementById('municipality-dropdown').style.display = 'none';
-            filterTable();
-            let sortType = document.getElementById("sort-dropdown").value || "default";
-            updateGraphAndTable(sortType);
-            // Use the globally exposed function to highlight the municipality
-            if (typeof window.highlightMunicipality === 'function') {
-                window.highlightMunicipality(selectedMunicipality);
-            }
-        }
-    
-        function navigateDropdown(event) {
-            let dropdown = document.getElementById('municipality-dropdown');
-            let options = Array.from(dropdown.getElementsByTagName('option')).filter(opt => opt.style.display !== 'none');
-            if (event.key === 'ArrowDown') {
-                currentIndex = (currentIndex + 1) % options.length;
-            } else if (event.key === 'ArrowUp') {
-                currentIndex = (currentIndex - 1 + options.length) % options.length;
-            } else if (event.key === 'Enter' && currentIndex >= 0) {
-                selectOption({ target: options[currentIndex] });
-                return;
-            }
-            options.forEach((opt, index) => {
-                opt.style.background = (index === currentIndex) ? '#ddd' : '';
-            });
-        }
-    
-        document.addEventListener('click', function(event) {
-            let searchBar = document.getElementById('municipality-search');
-            let dropdown = document.getElementById('municipality-dropdown');
-            if (!searchBar.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.style.display = 'none';
-            }
-        });
-    
-        // Expose functions for inline event handlers.
-        window.showDropdown = showDropdown;
-        window.filterDropdown = filterDropdown;
-        window.selectOption = selectOption;
-        window.navigateDropdown = navigateDropdown;
-        // --- End Searchbar Functions --- //
-    
-        // --- Map Highlighting Functions --- //
-        function highlightMunicipality(selected) {
-            // Ensure the map variable is available.
-            if (typeof map_ad73d13c14dcfb509348dae11fdcdb2e  === 'undefined') {
-                console.error("Map object not found.");
-                return;
-            }
-            for (var layerId in map_ad73d13c14dcfb509348dae11fdcdb2e ._layers) {
-                var layer = map_ad73d13c14dcfb509348dae11fdcdb2e ._layers[layerId];
-                if (layer.feature && layer.feature.properties && layer.feature.properties.name) {
-                    var munName = layer.feature.properties.name.trim().toLowerCase();
-                    if (munName === selected.trim().toLowerCase()) {
-                        layer.setStyle({
-                            fillOpacity: 0.9,
-                            color: 'red',
-                            weight: 3
-                        });
-                        if (layer.bringToFront) { layer.bringToFront(); }
-                    } else {
-                        layer.setStyle({
-                            fillOpacity: 0.1,
-                            color: 'gray',
-                            weight: 1
-                        });
-                    }
-                }
-            }
-        }
-    
-        function resetMapStyles() {
-            if (typeof map_ad73d13c14dcfb509348dae11fdcdb2e  === 'undefined') {
-                console.error("Map object not found.");
-                return;
-            }
-            for (var layerId in map_ad73d13c14dcfb509348dae11fdcdb2e ._layers) {
-                var layer = map_ad73d13c14dcfb509348dae11fdcdb2e ._layers[layerId];
-                if (layer.feature && layer.feature.properties && layer.feature.properties.name) {
-                    layer.setStyle({
-                        fillOpacity: 0.7,
-                        color: 'black',
-                        weight: 2
-                    });
-                }
-            }
-        }
-    
-        // Expose these functions globally.
-        window.highlightMunicipality = highlightMunicipality;
-        window.resetMapStyles = resetMapStyles;
-        // --- End Map Highlighting Functions --- //
-    
-        // --- Toggle Real-Time / Historical Content --- //
-        document.getElementById("realtime-btn").addEventListener("click", function() {
-            document.getElementById("realtime-content").style.display = "block";
-            document.getElementById("historical-content").style.display = "none";
-            this.classList.add("active");
-            document.getElementById("historical-btn").classList.remove("active");
-        });
-    
-        document.getElementById("historical-btn").addEventListener("click", function() {
-            document.getElementById("realtime-content").style.display = "none";
-            document.getElementById("historical-content").style.display = "block";
-            this.classList.add("active");
-            document.getElementById("realtime-btn").classList.remove("active");
+document.addEventListener("DOMContentLoaded", function () {
+    const municipalitySearch = document.getElementById("municipality-search");
+    const municipalityDropdown = document.getElementById("municipality-dropdown");
+    const sortDropdown = document.getElementById("sort-dropdown");
+    const graphToggleDropdown = document.getElementById("graph-toggle-dropdown");
+    const barChartContainer = document.getElementById("bar-chart-container");
+    const yieldTableContainer = document.getElementById("yield-table-container");
+    const tableBody = document.getElementById("data-table").getElementsByTagName("tbody")[0];
+    const municipalities = [
+    "ALAMINOS", "BAY", "CABUYAO", "CALAUAN", "CAVINTI", "BIÑAN", "CALAMBA",
+    "SANTA ROSA", "FAMY", "KALAYAAN", "LILIW", "LOS BAÑOS", "LUISIANA",
+    "LUMBAN", "MABITAC", "MAGDALENA", "MAJAYJAY", "NAGCARLAN", "PAETE",
+    "PAGSANJAN", "PAKIL", "PANGIL", "PILA", "RIZAL", "SAN PABLO", "SANTA CRUZ",
+    "SANTA MARIA", "SINILOAN", "VICTORIA"
+    ];
 
-            // Re-render chart after showing historical content
-            setTimeout(function() {
-                if (typeof myChart !== "undefined") {
-                    myChart.resize();  
-                }
-            }, 100);
-        });
 
-        // --- End Toggle --- //
-    
-        // --- Dropdown Style Change --- //
-        document.getElementById("graph-toggle-dropdown").addEventListener("change", function() {
-            this.style.color = "#69a436"; 
-        });
-        document.getElementById("sort-dropdown").addEventListener("change", function() {
-            this.style.color = "#69a436"; 
-            updateGraphAndTable(this.value);
-        });
-        // --- End Dropdown Style Change --- //
-    
-        // --- Create Legend Items --- //
-        const legendData = [
-            { color: "#d13237", label: "< 3" },
-            { color: "#ffc91f", label: "3 - 4" },
-            { color: "#69a436", label: "4 - 5" },
-            { color: "#1b499f", label: "> 5" }
-        ];
-        const legendContainer = document.getElementById("legend-container");
-        legendData.forEach(item => {
-            const legendItem = document.createElement("div");
-            legendItem.classList.add("legend-item");
-            const legendBox = document.createElement("div");
-            legendBox.classList.add("legend-box");
-            legendBox.style.backgroundColor = item.color;
-            const legendLabel = document.createElement("span");
-            legendLabel.textContent = item.label;
-            legendItem.appendChild(legendBox);
-            legendItem.appendChild(legendLabel);
-            legendContainer.appendChild(legendItem);
-        });
-        // --- End Legend Items --- //
-    
-        // --- Graph and Table Update Functionality --- //
-        var sortDropdown = document.getElementById("sort-dropdown");
-        var tableBody = document.querySelector("#yield-table-container tbody");
-        var barChart;
-    
-        function updateGraphAndTable(sortType) {
-            var municipalities = JSON.parse('{{ municipalities | tojson | safe }}');
-            var yields = JSON.parse('{{ yields | tojson | safe }}');
-            var searchText = document.getElementById('municipality-search').value.toUpperCase();
-    
-            var data = municipalities.map((municipality, index) => ({
-                municipality: municipality,
-                yield: yields[index]
-            })).filter(item => item.municipality.toUpperCase().indexOf(searchText) > -1);
-    
-            if (data.length === 0) {
-                if (barChart) { barChart.destroy(); }
-                document.getElementById("bar-chart-container").innerHTML = "<p style='text-align:center;'>No Data</p>";
-                tableBody.innerHTML = "<tr><td colspan='2' style='text-align:center; font-weight:bold; color:gray;'>No Data</td></tr>";
-                return;
-            } else {
-                if (!document.getElementById("bar-chart")) {
-                    document.getElementById("bar-chart-container").innerHTML = "<canvas id='bar-chart'></canvas>";
-                }
-            }
-    
-            if (sortType === "asc") {
-                data.sort((a, b) => a.yield - b.yield);
-            } else if (sortType === "desc") {
-                data.sort((a, b) => b.yield - a.yield);
-            }
-    
-            var sortedMunicipalities = data.map(item => item.municipality);
-            var sortedYields = data.map(item => item.yield);
-    
-            var newHeight = Math.max(sortedMunicipalities.length * 30, 200);
-            document.getElementById("bar-chart-container").style.height = newHeight + "px";
-    
-            if (barChart) { barChart.destroy(); }
-            var ctx = document.getElementById("bar-chart").getContext("2d");
-            barChart = new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: sortedMunicipalities,
-                    datasets: [{
-                        label: "Yield (t/ha)",
-                        data: sortedYields,
-                        backgroundColor: sortedYields.map(y => {
-                            if (y < 3) return "#d13237";
-                            if (y >= 3 && y < 4) return "#ffc91f";
-                            if (y >= 4 && y < 5) return "#69a436";
-                            return "#1b499f";
-                        }),
-                        borderRadius: 20,
-                        borderWidth: 0,
-                        barThickness: 5,
-                        categoryPercentage: 0.6,
-                        barPercentage: 0.7
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    scales: {
-                        x: { 
-                            beginAtZero: true,
-                            grid: { display: false },
-                            ticks: {
-                                maxRotation: 0,
-                                autoSkip: true
-                            }
-                        },
-                        y: { ticks: { autoSkip: false, font: { size: 12 } } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-    
-            tableBody.innerHTML = "";
-            data.forEach(item => {
-                var yieldText = item.yield > 0 ? item.yield : "No Data";
-                var row = `<tr><td>${item.municipality}</td><td>${yieldText}</td></tr>`;
-                tableBody.innerHTML += row;
-            });
-        }
-    
-        sortDropdown.addEventListener("change", function () {
-            var sortType = this.value;
-            updateGraphAndTable(sortType);
-        });
-    
-        updateGraphAndTable("default");
-        // --- End Graph and Table Update --- //
-    
-        // --- Graph Toggle Dropdown Functionality --- //
-        var barChartContainer = document.getElementById("bar-chart-container");
-        var tableContainer = document.getElementById("yield-table-container");
-        var graphToggleDropdown = document.getElementById("graph-toggle-dropdown");
-    
-        graphToggleDropdown.addEventListener("change", function () {
-            let sortType = document.getElementById("sort-dropdown").value || "default";
-            if (this.value === "bar") {
-                barChartContainer.style.display = "block";
-                tableContainer.style.display = "none";
-                updateGraphAndTable(sortType);
-            } else if (this.value === "table") {
-                barChartContainer.style.display = "none";
-                tableContainer.style.display = "block";
-                updateGraphAndTable(sortType);
-            }
-        });
+    let originalYieldData = []; 
+    let currentChart = null;
 
-        // --- HISTORICAL CONTENTS --- //
-        // Inject historical_yield_data as a global variable
-        var historicalDataGlobal = {{ historical_yield_data | tojson | safe }};
-        console.log("Historical Data (global):", historicalDataGlobal);
-        // Global historical data injected by Flask
-        window.historicalDataGlobal = {{ historical_yield_data | tojson | safe }};
-        console.log("Historical Data (global):", window.historicalDataGlobal);
-        // --- Bar Chart --- //
-        var historicalData = window.historicalDataGlobal;
-        console.log("Historical Yield Data:", historicalData);
-        
-        if (historicalData.length > 0) {
-            var labels = historicalData.map(function(item) { 
-                return item.municipality; 
-            });
-            var values = historicalData.map(function(item) { 
-                return item.yield; 
-            });
-            
-            var canvas = document.getElementById("historical-bar-chart");
-            if (!canvas) {
-                console.error("Canvas element with id 'historical-bar-chart' not found.");
-                return;
+    //  --- Toggle Real-Time / Historical Content --- //
+    document.getElementById("realtime-btn").addEventListener("click", function() {
+        document.getElementById("realtime-content").style.display = "block";
+        document.getElementById("historical-content").style.display = "none";
+        this.classList.add("active");
+        document.getElementById("historical-btn").classList.remove("active");
+    });
+
+    document.getElementById("historical-btn").addEventListener("click", function() {
+        document.getElementById("realtime-content").style.display = "none";
+        document.getElementById("historical-content").style.display = "block";
+        this.classList.add("active");
+        document.getElementById("realtime-btn").classList.remove("active");
+
+        // Re-render chart after showing historical content
+        setTimeout(function() {
+            if (typeof myChart !== "undefined") {
+                myChart.resize();  
             }
-            var ctx = canvas.getContext("2d");
-            
-            // Destroy any existing chart instance
-            if (window.historicalChartInstance) {
-                window.historicalChartInstance.destroy();
-            }
-            
-            window.historicalChartInstance = new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: "Historical Yield (t/ha)",
-                        data: values,
-                        backgroundColor: values.map(function(y) {
-                            var v = parseFloat(y);
-                            if (v < 3) return "#d13237";
-                            if (v >= 3 && v < 4) return "#ffc91f";
-                            if (v >= 4 && v < 5) return "#69a436";
-                            return "#1b499f";
-                        }),
-                        borderWidth: 1,
-                        barPercentage: 0.5,       // Make bars thinner
-                        categoryPercentage: 0.8,    // Adjust group width
-                        maxBarThickness: 20         // Set maximum bar thickness
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y'  // Renders horizontal bars
-                }
-            });
-        }
+        }, 100);
+    });
 
-        // --- Graph Toggle Dropdown Functionality --- //
-        // --- TABLE --- //
-        var graphToggleDropdownHis = document.getElementById("graph-toggle-dropdown-his");
-        var historicalBarChartContainer = document.getElementById("historical-bar-chart-container");
-        var yieldTableContainerHis = document.getElementById("yield-table-container-his");
+    //  --- Search Bar --- //
+    document.getElementById("municipality-search").addEventListener("click", function() {
+        showDropdown(); // Show all municipalities when clicked
+    });
 
-        graphToggleDropdownHis.addEventListener("change", function () {
-            var selectedView = this.value; 
-            if (selectedView === "bar") {
-                // Show bar chart container and hide yield table container
-                historicalBarChartContainer.style.display = "block";
-                yieldTableContainerHis.style.display = "none";
-            } else if (selectedView === "table") {
-                // Hide bar chart container and show yield table container
-                historicalBarChartContainer.style.display = "none";
-                yieldTableContainerHis.style.display = "block";
-            }
-        });
+    document.getElementById("municipality-search").addEventListener("input", function() {
+        filterDropdown(); // Filter based on input
+    });
 
-        // sort Year and Season
-        function filterHistoricalDataByYearAndSeason(data) {
-        var yearDropdown = document.getElementById("year-dropdown-his");
-        var seasonDropdown = document.getElementById("season-dropdown-his");
-        var selectedYear = yearDropdown ? yearDropdown.value : "";
-        var selectedSeason = seasonDropdown ? seasonDropdown.value : "";
-
-        // Convert season string to the expected numeric value if necessary
-        if (selectedSeason.toLowerCase() === "season1") {
-            selectedSeason = "1";
-        } else if (selectedSeason.toLowerCase() === "season2") {
-            selectedSeason = "2";
-        }
-        
-        // Filter the data; note that year and season in your data should be comparable (as strings or numbers)
-        return data.filter(function(item) {
-            return (item.year == selectedYear) && (item.season == selectedSeason);
-        });
+    function showDropdown() {
+        let dropdown = document.getElementById("municipality-dropdown");
+        dropdown.style.display = "block"; 
+        populateDropdown(municipalities); // Show all municipalities
     }
 
-        // --- Sort Toggle Dropdown Functionality --- //
-        window.historicalDataGlobal = {{ historical_yield_data | tojson | safe }};
-        console.log("Historical Data (global):", window.historicalDataGlobal);
-        
-        function updateHistoricalView() {
-        var sortDropdown = document.getElementById("sort-dropdown-his");
-        var order = (sortDropdown && sortDropdown.value) || "default";
-        console.log("Sort order selected:", order);
-        
-        // Clone the global data
-        var data = JSON.parse(JSON.stringify(window.historicalDataGlobal));
-        
-        // First filter data by selected year and season
-        data = filterHistoricalDataByYearAndSeason(data);
-        console.log("Filtered data:", data);
-        
-        // Then sort the filtered data based on yield
-        if (order === "asc") {
-            data.sort((a, b) => parseFloat(a.yield) - parseFloat(b.yield));
-        } else if (order === "desc") {
-            data.sort((a, b) => parseFloat(b.yield) - parseFloat(a.yield));
-        }
-        console.log("Sorted data:", data);
-        
-        // Determine current view (bar or table)
-        var graphToggle = document.getElementById("graph-toggle-dropdown-his");
-        var currentView = (graphToggle && graphToggle.value) || "bar";
-        console.log("Current view:", currentView);
-        
-        if (currentView === "bar") {
-            updateHistoricalChart(data);
-        } else if (currentView === "table") {
-            updateHistoricalTable(data);
-        }
+    function filterDropdown() {
+        let input = document.getElementById("municipality-search");
+        let clearBtn = document.getElementById("clear-search");
+
+        // ✅ Show ❌ when input has text
+        clearBtn.style.display = input.value.length > 0 ? "block" : "none";
+
+        let filteredMunicipalities = municipalities.filter(m => 
+            m.toUpperCase().includes(input.value.toUpperCase())
+        );
+
+        populateDropdown(filteredMunicipalities);
     }
 
-        function updateHistoricalChart(data) {
-        var canvas = document.getElementById("historical-bar-chart");
-        if (!canvas) {
-            console.error("Historical bar chart canvas not found.");
+
+    function clearSearch() {
+        let input = document.getElementById("municipality-search");
+        let clearBtn = document.getElementById("clear-search");
+
+        // ✅ Clear input field
+        input.value = "";
+
+        // ✅ Hide ❌ button
+        clearBtn.style.display = "none";
+
+        // ✅ Hide dropdown
+        document.getElementById("municipality-dropdown").style.display = "none";
+
+        // ✅ Reset graph & table
+        updateRealTimeGraph(
+            originalYieldData.map(item => item.municipality),
+            originalYieldData.map(item => item.yield)
+        );
+        updateRealTimeTable(originalYieldData);
+    }
+
+    document.getElementById("clear-search").addEventListener("click", clearSearch);
+
+
+    function populateDropdown(items) {
+        let dropdown = document.getElementById("municipality-dropdown");
+        dropdown.innerHTML = ""; // Clear existing items
+
+        if (items.length === 0) {
+            dropdown.innerHTML = `<div class="dropdown-item">No results found</div>`;
             return;
         }
-        var ctx = canvas.getContext("2d");
-        
-        // Destroy any existing chart instance
-        if (window.historicalChartInstance) {
-            window.historicalChartInstance.destroy();
+
+        items.forEach(m => {
+            let option = document.createElement("div");
+            option.className = "dropdown-item";
+            option.textContent = m;
+            
+            option.onclick = function() {
+                selectOption(m);
+            };
+
+            dropdown.appendChild(option);
+        });
+    }
+
+    function selectOption(municipality) {
+        let searchInput = document.getElementById("municipality-search");
+        let dropdown = document.getElementById("municipality-dropdown");
+        let clearBtn = document.getElementById("clear-search");
+
+        // ✅ Set input value to the selected municipality
+        searchInput.value = municipality;
+
+        // ✅ Show the ❌ button
+        clearBtn.style.display = "block";
+
+        // ✅ Hide dropdown
+        dropdown.style.display = "none";
+
+        // ✅ Filter data for the selected municipality
+        let filteredData = originalYieldData.filter(item => item.municipality === municipality);
+
+        // ✅ Update graph & table
+        updateRealTimeGraph(
+            filteredData.map(item => item.municipality),
+            filteredData.map(item => item.yield)
+        );
+        updateRealTimeTable(filteredData);
+    }
+
+
+
+    // ✅ Close dropdown when clicking outside
+    document.addEventListener("click", function(event) {
+        let dropdown = document.getElementById("municipality-dropdown");
+        let searchInput = document.getElementById("municipality-search");
+
+        if (!searchInput.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.style.display = "none"; 
         }
-        
-        window.historicalChartInstance = new Chart(ctx, {
+    });
+
+
+
+    //  --- End Search Bar --- //
+
+
+    function fetchRealTimeData() {
+        fetch('/get_real_time_data')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.municipalities || !data.yields) {
+                    console.error("❌ Error: Missing 'municipalities' or 'yields' in response", data);
+                    return;
+                }
+                originalYieldData = data.municipalities.map((municipality, index) => ({
+                    municipality: municipality,
+                    yield: data.yields[index]
+                }));
+                updateRealTimeTable(originalYieldData);
+                updateRealTimeGraph(data.municipalities, data.yields);
+            })
+            .catch(error => console.error("❌ Error fetching real-time data:", error));
+    }
+
+    function updateRealTimeTable(yieldData) {
+        tableBody.innerHTML = "";
+        yieldData.forEach(entry => {
+            let row = `<tr>
+                <td>${entry.municipality}</td>
+                <td>${entry.yield.toFixed(2)} t/ha</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    function updateRealTimeGraph(municipalities, yields) {
+        let ctx = document.getElementById("bar-chart").getContext("2d");
+        if (window.realTimeChart) {
+            window.realTimeChart.destroy();
+        }
+
+        window.realTimeChart = new Chart(ctx, {
             type: "bar",
             data: {
-                labels: data.map(item => item.municipality),  // Municipality names
+                labels: municipalities,
                 datasets: [{
-                    label: "Historical Yield (t/ha)",
-                    data: data.map(item => item.yield),    // Yield values
-                    backgroundColor: data.map(item => {
-                        var y = parseFloat(item.yield);
-                        if (y < 3) return "#d13237";
-                        if (y >= 3 && y < 4) return "#ffc91f";
-                        if (y >= 4 && y < 5) return "#69a436";
-                        return "#1b499f";
+                    label: "Real-Time Yield (t/ha)",
+                    data: yields,
+                    backgroundColor: yields.map(y => {
+                        let val = parseFloat(y);
+                        return val < 3 ? "#d13237" : val < 4 ? "#ffc91f" : val < 5 ? "#69a436" : "#1b499f";
                     }),
                     borderWidth: 1
                 }]
@@ -734,47 +438,120 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                indexAxis: 'y'  // For horizontal bars
+                indexAxis: 'y' 
             }
         });
     }
 
-    function updateHistoricalTable(data) {
-        var tbody = document.getElementById("historical-table-body-his");
-        if (!tbody) {
-            console.error("Historical table body not found.");
-            return;
+
+    municipalitySearch?.addEventListener("input", function () {
+        let filteredData = originalYieldData.filter(item =>
+            item.municipality.toLowerCase().includes(this.value.toLowerCase())
+        );
+        updateRealTimeTable(filteredData);
+        updateRealTimeGraph(
+            filteredData.map(item => item.municipality),
+            filteredData.map(item => item.yield)
+        );
+    });
+
+    sortDropdown?.addEventListener("change", function () {
+        let sortedData = [...originalYieldData];
+        if (this.value === "asc") {
+            sortedData.sort((a, b) => a.yield - b.yield);
+        } else if (this.value === "desc") {
+            sortedData.sort((a, b) => b.yield - a.yield);
         }
-        tbody.innerHTML = "";
-        if (data.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='2'>No Data</td></tr>";
-            return;
+        updateRealTimeTable(sortedData);
+        updateRealTimeGraph(
+            sortedData.map(item => item.municipality),
+            sortedData.map(item => item.yield)
+        );
+    });
+
+    graphToggleDropdown?.addEventListener("change", function () {
+        barChartContainer.style.display = this.value === "bar" ? "block" : "none";
+        yieldTableContainer.style.display = this.value === "table" ? "block" : "none";
+    });
+
+    setInterval(fetchRealTimeData, 30000);
+    fetchRealTimeData();
+
+    // --- HISTORICAL CONTENTS --- //
+    window.historicalDataGlobal = {{ historical_yield_data | tojson | safe }};
+    console.log("Historical Data (global):", window.historicalDataGlobal);
+
+    function updateHistoricalView() {
+        let sortDropdownHis = document.getElementById("sort-dropdown-his");
+        let graphToggleHis = document.getElementById("graph-toggle-dropdown-his");
+        let yearDropdown = document.getElementById("year-dropdown-his");
+        let seasonDropdown = document.getElementById("season-dropdown-his");
+
+        let selectedYear = yearDropdown?.value || "";
+        let selectedSeason = seasonDropdown?.value || "";
+
+        if (selectedSeason.toLowerCase() === "season1") selectedSeason = "1";
+        if (selectedSeason.toLowerCase() === "season2") selectedSeason = "2";
+
+        let data = window.historicalDataGlobal.filter(item =>
+            item.year == selectedYear && item.season == selectedSeason
+        );
+
+        if (sortDropdownHis?.value === "asc") {
+            data.sort((a, b) => parseFloat(a.yield) - parseFloat(b.yield));
+        } else if (sortDropdownHis?.value === "desc") {
+            data.sort((a, b) => parseFloat(b.yield) - parseFloat(a.yield));
         }
-        data.forEach(item => {
-            var row = document.createElement("tr");
-            row.innerHTML = `<td>${item.municipality}</td><td>${item.yield}</td>`;
-            tbody.appendChild(row);
+
+        if (graphToggleHis?.value === "bar") {
+            updateHistoricalChart(data);
+        } else {
+            updateHistoricalTable(data);
+        }
+    }
+
+    function updateHistoricalChart(data) {
+        let canvas = document.getElementById("historical-bar-chart");
+        if (!canvas) return;
+        let ctx = canvas.getContext("2d");
+
+        if (window.historicalChartInstance) {
+            window.historicalChartInstance.destroy();
+        }
+
+        window.historicalChartInstance = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: data.map(item => item.municipality),
+                datasets: [{
+                    label: "Historical Yield (t/ha)",
+                    data: data.map(item => item.yield),
+                    backgroundColor: data.map(item => {
+                        let y = parseFloat(item.yield);
+                        return y < 3 ? "#d13237" : y < 4 ? "#ffc91f" : y < 5 ? "#69a436" : "#1b499f";
+                    }),
+                    borderWidth: 1
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
         });
     }
 
-        
-        // Event listeners
-        document.getElementById("sort-dropdown-his").addEventListener("change", function () {
-        console.log("Sort dropdown changed to: " + this.value);
-        updateHistoricalView();
-        });
+    function updateHistoricalTable(data) {
+        let tbody = document.getElementById("historical-table-body-his");
+        if (!tbody) return;
+        tbody.innerHTML = data.length === 0 ? "<tr><td colspan='2'>No Data</td></tr>" : 
+            data.map(item => `<tr><td>${item.municipality}</td><td>${item.yield}</td></tr>`).join('');
+    }
 
-        document.getElementById("graph-toggle-dropdown-his").addEventListener("change", function () {
-        updateHistoricalView();
-        });
+    document.getElementById("sort-dropdown-his")?.addEventListener("change", updateHistoricalView);
+    document.getElementById("graph-toggle-dropdown-his")?.addEventListener("change", updateHistoricalView);
+    document.getElementById("year-dropdown-his")?.addEventListener("change", updateHistoricalView);
+    document.getElementById("season-dropdown-his")?.addEventListener("change", updateHistoricalView);
 
-        document.getElementById("year-dropdown-his")?.addEventListener("change", updateHistoricalView);
-        document.getElementById("season-dropdown-his")?.addEventListener("change", updateHistoricalView);
-
-        // Initial update
-        updateHistoricalView();
-
+    updateHistoricalView();
 });
+
 </script>
 </html>
 

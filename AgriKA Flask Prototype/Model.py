@@ -88,11 +88,11 @@ filepath = r"C:\Users\ASUS\OneDrive\Documents\GitHub\Thesis_Web\AgriKA Flask Pro
 municipality_polygons = load_and_process_geojson(filepath)
 
 
-# Sentinel Hub Configuration
+# Sentinel Hub Configuration (Chan acc)
 config = SHConfig()
-config.instance_id = '34fbb6f7-0161-4322-8fe7-87a3f49a95c4'
-config.sh_client_id = '59b27267-9361-4628-865a-03ba9d0667aa'
-config.sh_client_secret = 'GmLNYkGAgdd6h0x8xtR397N6AUzsluhx'
+config.instance_id = '02b955f7-030e-453a-b885-f98ce9bb9b21'
+config.sh_client_id = '69bf8488-5b95-4280-b210-abe2ecb9f9fb'
+config.sh_client_secret = 'cohjRSmgar5eBNrht4uXIvF2KSgt6dTN'
 
 catalog = SentinelHubCatalog(config=config)
 

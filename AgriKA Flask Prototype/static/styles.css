@@ -248,9 +248,13 @@
    
    /* Bar Chart Container */
    #bar-chart-container {
-       height: 450px;
-       margin-bottom: 20px;
-       width: 100%;
+        width: 100%;
+        height: 1000px;
+        overflow-y: auto;
+        margin: 20px auto;
+        background-color: #e2dcdc;
+        border: 1px solid #ddd;
+        padding: 10px;
    }
    
    /* Table Container */
@@ -551,7 +555,21 @@
    .realtime-btn.active {
        color: #ffb902;
    }
-   
+
+   #clear-search {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    display: none;
+    font-size: 16px;
+    color: gray;
+    background: white;
+    padding: 0 5px;
+    z-index: 10;  /* ✅ Ensures it's on top */
+    }
+
    /* Graph Button Styles */
    .graph-btn {
        font-size: 14px;

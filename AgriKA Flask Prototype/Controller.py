@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from model.db import get_db_connection 
 from datetime import datetime
 import folium
@@ -10,23 +10,23 @@ import base64
 
 app = Flask(__name__)
 
-def get_realtime_yield_data():
-    municipalities = [
-        "Alaminos", "Bay", "Cabuyao", "Calauan", "Cavinti", "Biñan", "Calamba",
-        "San Pedro", "Santa Rosa", "Famy", "Kalayaan", "Liliw", "Los Baños", "Luisiana",
-        "Lumban", "Mabitac", "Magdalena", "Majayjay", "Nagcarlan", "Paete", "Pagsanjan", "Pakil", "Pangil",
-        "Pila", "Rizal", "San Pablo", "Santa Cruz", "Santa Maria", "Siniloan", "Victoria"
-    ]
+# def get_realtime_yield_data():
+#     municipalities = [
+#         "Alaminos", "Bay", "Cabuyao", "Calauan", "Cavinti", "Biñan", "Calamba",
+#         "San Pedro", "Santa Rosa", "Famy", "Kalayaan", "Liliw", "Los Baños", "Luisiana",
+#         "Lumban", "Mabitac", "Magdalena", "Majayjay", "Nagcarlan", "Paete", "Pagsanjan", "Pakil", "Pangil",
+#         "Pila", "Rizal", "San Pablo", "Santa Cruz", "Santa Maria", "Siniloan", "Victoria"
+#     ]
 
-    yields = [
-        5.838, 4.694, 5.681, 4.716, 4.420, 5.603, 5.033, 0, 5.467, 4.452,
-        3.959, 5.128, 5.313, 4.394, 4.043, 4.351, 5.412, 4.100, 4.588, 4.041,
-        4.050, 4.485, 3.940, 4.417, 3.949, 4.614, 4.757, 4.678, 3.963, 4.583
-    ]
+#     yields = [
+#         5.838, 4.694, 5.681, 4.716, 4.420, 5.603, 5.033, 0, 5.467, 4.452,
+#         3.959, 5.128, 5.313, 4.394, 4.043, 4.351, 5.412, 4.100, 4.588, 4.041,
+#         4.050, 4.485, 3.940, 4.417, 3.949, 4.614, 4.757, 4.678, 3.963, 4.583
+#     ]
 
-    yield_data = [(m.strip().lower(), y if y > 0 else "No data") for m, y in zip(municipalities, yields)]
+#     yield_data = [(m.strip().lower(), y if y > 0 else "No data") for m, y in zip(municipalities, yields)]
     
-    return municipalities, yields, yield_data
+#     return municipalities, yields, yield_data
 
 def get_color(yield_value):
 
@@ -55,7 +55,8 @@ def create_map():
     geojson_files = [f"data/{file}" for file in os.listdir("data") if file.endswith(".geojson")]
 
     municipalities, yields, yield_data = get_realtime_yield_data()
-    yield_dict = {m: v for m, v in yield_data}
+    yield_dict = yield_data  # ✅ No need to reconstruct
+
 
     for file in geojson_files:
         if os.path.exists(file):
@@ -157,8 +158,6 @@ def generate_yield_chart(municipalities, yields):
 #### REAL TIME PART #####
 def get_phase(day, month):
     """
-    Determine phase based on day and month.
-    
     For the first cycle (dates not between March 16 and September 15):
         - Phase 1: September 16 to October 31
         - Phase 2: November, December, and January
@@ -192,12 +191,11 @@ def get_phase(day, month):
     # Fallback (shouldn't happen if date is valid)
     return None
 
-
 def store_prediction_result(result):
     city = result.get('City')
     day = int(result.get('Day'))
     month = int(result.get('Month'))
-    predicted_yield = float(result.get('Predicted Yield'))  # ✅ Convert numpy.float32 to Python float
+    predicted_yield = float(result.get('Predicted Yield'))  # Convert numpy.float32 to Python float
     phase = get_phase(day, month)
     current_year = datetime.now().year
     date_str = f"{current_year}-{month:02d}-{day:02d}"
@@ -206,13 +204,27 @@ def store_prediction_result(result):
     
     try:
         with conn.cursor() as cursor:
+            # Get ID_rice for the given city
             cursor.execute("SELECT ID_rice FROM rice_field WHERE municipality = %s", (city,))
-            result_rows = cursor.fetchall()  # ✅ Fetch all results
+            result_rows = cursor.fetchall()
             if not result_rows:
                 print(f"Warning: No rice_field record found for '{city}'. Skipping insertion.")
                 return
             id_rice = result_rows[0][0]
 
+            # 🔍 **Check if record already exists**
+            check_query = """
+                SELECT COUNT(*) FROM real_time 
+                WHERE ID_rice = %s AND date = %s
+            """
+            cursor.execute(check_query, (id_rice, date_str))
+            count = cursor.fetchone()[0]
+
+            if count > 0:
+                print(f"Skipping insertion: Data for '{city}' on {date_str} already exists.")
+                return
+
+            # ✅ **Insert only if no duplicate exists**
             insert_query = """
                 INSERT INTO real_time (ID_rice, date, phase, yield)
                 VALUES (%s, %s, %s, %s)
@@ -220,11 +232,73 @@ def store_prediction_result(result):
             cursor.execute(insert_query, (id_rice, date_str, phase, predicted_yield))
             conn.commit()
             print("Prediction result inserted successfully.")
+    
     except Exception as e:
         conn.rollback()
         print("Error inserting prediction result:", e)
+    
     finally:
         conn.close()
+        
+#Fetching real time data from database to display#
+def get_realtime_yield_data():
+    """Fetch real-time yield data (Municipality, Yield, and Yield Data Dictionary)."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        query = """
+        SELECT rf.municipality, rt.yield
+        FROM real_time rt
+        JOIN rice_field rf ON rt.ID_rice = rf.ID_rice
+        WHERE rt.date = (SELECT MAX(date) FROM real_time WHERE ID_rice = rt.ID_rice)  # Get latest yield per municipality
+        ORDER BY rf.municipality ASC
+        """
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        print("🔹 Raw Database Results:", results)  # Debugging log
+
+        if not results:
+            return [], [], {}  # Return empty if no data found
+
+        municipalities = [row[0] for row in results]
+        yields = [row[1] if row[1] is not None else "No data" for row in results]  # Handle None values
+        yield_data = {row[0]: row[1] if row[1] is not None else "No data" for row in results}  
+
+        print("✅ Parsed Data:", municipalities, yields, yield_data)  # Debugging log
+        return municipalities, yields, yield_data  
+
+    except Exception as e:
+        print(f"❌ Error fetching real-time data: {e}")
+        return [], [], {}  
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+@app.route('/get_real_time_data')
+def get_real_time_data():
+    """Fetch real-time yield data dynamically via AJAX."""
+    try:
+        municipalities, yields, yield_data = get_realtime_yield_data()  # ✅ Correctly unpacking 3 values
+
+        print("✅ Real-time Data Fetched:", municipalities, yields, yield_data)  # Debugging Output
+
+        response = jsonify({
+            "municipalities": municipalities,
+            "yields": yields,
+            "yield_data": yield_data  # ✅ Include yield_data in JSON response
+        })
+        print("🔹 JSON Response:", response.get_data(as_text=True))  # Debugging output
+        return response
+
+    except Exception as e:
+        print(f"❌ Error fetching real-time data: {e}")
+        return jsonify({"error": str(e)}), 500
+
 
 
 
@@ -261,25 +335,34 @@ def home():
 @app.route('/view')
 def view():
     create_map()
+
+    try:
+        municipalities, yields, yield_data = get_realtime_yield_data()  #Unpacking three values ✅ 
+    except Exception as e:
+        print("❌ Error in get_realtime_yield_data:", e)
+        municipalities, yields, yield_data = [], [], {}
+
+    try:
+        yield_chart = generate_yield_chart(municipalities, yields) if municipalities and yields else None
+    except Exception as e:
+        print("❌ Error in generate_yield_chart:", e)
+        yield_chart = None
+
+    try:
+        historical_yield_data = get_historical_data()
+    except Exception as e:
+        print("❌ Error in get_historical_data:", e)
+        historical_yield_data = []
     
-    # Fetch real-time data
-    municipalities, yields, yield_data = get_realtime_yield_data()
-    yield_chart = generate_yield_chart(municipalities, yields)
-
-    # Fetch historical data
-    historical_yield_data = get_historical_data()
-    print("🔹 Historical Yield Data:", historical_yield_data)  # Debugging output
-
     return render_template(
         'View.html', 
         municipalities=municipalities, 
         yields=yields, 
-        yield_data=yield_data, 
+        yield_data=yield_data,  # ✅ Pass yield_data to template
         yield_chart=yield_chart,  
         table_container_id="yield-table-container",
         historical_yield_data=historical_yield_data
     )
-
 
 
 if __name__ == '__main__':
