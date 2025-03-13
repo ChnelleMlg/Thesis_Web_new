@@ -369,8 +369,6 @@ document.addEventListener("DOMContentLoaded", function () {
         updateRealTimeTable(filteredData);
     }
 
-
-
     // ✅ Close dropdown when clicking outside
     document.addEventListener("click", function(event) {
         let dropdown = document.getElementById("municipality-dropdown");
@@ -503,12 +501,22 @@ document.addEventListener("DOMContentLoaded", function () {
             data.sort((a, b) => parseFloat(b.yield) - parseFloat(a.yield));
         }
 
+        // ✅ Corrected IDs
+        let barChartContainer = document.getElementById("historical-bar-chart-container");
+        let tableContainer = document.getElementById("yield-table-container-his"); // ✅ Fixed ID
+
         if (graphToggleHis?.value === "bar") {
+            if (barChartContainer) barChartContainer.style.display = "block";
+            if (tableContainer) tableContainer.style.display = "none"; // ✅ Hide table
             updateHistoricalChart(data);
-        } else {
+        } else if (graphToggleHis?.value === "table") {
+            if (barChartContainer) barChartContainer.style.display = "none";
+            if (tableContainer) tableContainer.style.display = "block"; // ✅ Show table
             updateHistoricalTable(data);
         }
     }
+
+
 
     function updateHistoricalChart(data) {
         let canvas = document.getElementById("historical-bar-chart");
