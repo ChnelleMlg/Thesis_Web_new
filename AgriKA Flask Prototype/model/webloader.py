@@ -1,0 +1,156 @@
+from model.db import get_db_connection, get_realtime_yield_data
+import folium
+import os
+import json
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
+
+def get_color(yield_value):
+    if yield_value == "No data":
+        return "#808080"
+    elif yield_value < 3:
+        return "#d13237"
+    elif 3 <= yield_value < 4:
+        return "#ffc91f"
+    elif 4 <= yield_value < 5:
+        return "#69a436"
+    else:
+        return "#1b499f"
+
+def create_map():
+    """
+    Generates a Folium map with municipalities colored based on yield values.
+    """
+    m = folium.Map(
+        location=[14.16667, 121.33333],
+        zoom_start=10,
+        tiles="CartoDB Positron",
+        attr="© OpenStreetMap contributors, © CartoDB"
+    )
+
+    geojson_files = [f"data/{file}" for file in os.listdir("data") if file.endswith(".geojson")]
+
+    municipalities, yields, yield_data = get_realtime_yield_data()
+    yield_dict = {m.lower(): v for m, v in yield_data.items()}
+
+    for file in geojson_files:
+        if os.path.exists(file):
+            with open(file, "r", encoding="utf-8") as f:
+                geojson_data = json.load(f)
+
+                geojson_data["features"] = [
+                    feature for feature in geojson_data["features"]
+                    if feature["geometry"]["type"] in ["Polygon", "MultiPolygon"]
+                ]
+
+                for feature in geojson_data["features"]:
+                    municipality_name = feature["properties"].get("name", "Unknown Municipality").strip().lower()
+
+                    if municipality_name not in yield_dict:
+                        print(f"❌ No yield data for: {municipality_name}")
+                    else:
+                        print(f"✅ Found: {municipality_name} -> {yield_dict[municipality_name]}")
+
+                    yield_value = yield_dict.get(municipality_name, "No data")
+
+                    tooltip_html = folium.Tooltip(
+                        f"""
+                        <div style="font-size: 14px; font-weight: bold;">
+                            🌾 {municipality_name.title()}
+                        </div>
+                        <div style="font-size: 12px;">
+                            <b>Yield:</b> {yield_value if isinstance(yield_value, (int, float)) else '<span style="color: red;">No data</span>'}
+                        </div>
+                        """,
+                        sticky=True
+                    )
+
+                    folium.GeoJson(
+                        feature,
+                        name=municipality_name,
+                        style_function=lambda feature, y=yield_value: {
+                            "fillColor": get_color(y),
+                            "color": "black",
+                            "weight": 2,
+                            "fillOpacity": 0.7,
+                        },
+                        tooltip=tooltip_html
+                    ).add_to(m)
+
+    # --- Embed a JavaScript Function to Highlight a Municipality ---
+    # Note: Folium creates a map variable with a generated name.
+    # You can get that name from m.get_name(). For example:
+    map_var = m.get_name()  # This returns a string like "map_a8f68228628dd4abeda66c8b1b11129b"
+    highlight_script = f"""
+                        <script>
+                        function highlightMunicipality(selected) {{
+                        for (var i in {map_var}._layers) {{
+                            var layer = {map_var}._layers[i];
+                            if (layer.feature && layer.feature.properties && layer.feature.properties.name) {{
+                                var munName = layer.feature.properties.name.trim().toLowerCase();
+                                if (munName === selected.trim().toLowerCase()) {{
+                                    layer.setStyle({{fillOpacity: 0.9, color: 'red', weight: 3}});
+                                    if (layer.bringToFront) {{
+                                        layer.bringToFront();
+                                    }}
+                                }} else {{
+                                    layer.setStyle({{fillOpacity: 0.7, color: 'black', weight: 2}});
+                                }}
+                            }}
+                        }}
+                        }}
+                        </script>
+                        """
+    m.get_root().html.add_child(folium.Element(highlight_script))
+    # --- End Embed Script ---
+
+    if not os.path.exists("templates"):
+        os.makedirs("templates")
+    m.save("templates/map.html")
+
+
+def generate_yield_chart(municipalities, yields):
+    """
+    Generates a bar chart for yield data and encodes it as a base64 image.
+    """
+    plt.figure(figsize=(10, 5))
+    plt.bar(municipalities, yields, color="#1b499f")
+    plt.xlabel("Municipalities")
+    plt.ylabel("Yield (tons per hectare)")
+    plt.xticks(rotation=90)
+    plt.title("Crop Yield Per Municipality")
+    plt.tight_layout()
+
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    chart_url = base64.b64encode(img.getvalue()).decode()
+    plt.close()
+
+    return chart_url
+
+
+# Fetch historical data from MySQL
+def get_historical_data(year=None, season=None):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Base query with JOIN
+    query = """
+        SELECT rf.municipality, rf.year, rf.season, h.yield
+        FROM historical h
+        JOIN rice_field rf ON h.ID_rice = rf.ID_rice
+    """
+    params = []
+
+    # Add filtering if parameters are provided
+    if year is not None and season is not None:
+        query += " WHERE rf.year = %s AND rf.season = %s"
+        params.extend([year, season])
+
+    cursor.execute(query, params)
+    data = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return data

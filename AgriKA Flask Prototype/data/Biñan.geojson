@@ -11,11 +11,11 @@
         "admin_level": "6",
         "boundary": "administrative",
         "land_area": "administrative",
-        "name": "Biñan",
+        "name": "Binan",
         "postal_code": "4024",
         "type": "boundary",
         "wikidata": "Q75961",
-        "wikipedia": "en:Biñan"
+        "wikipedia": "en:Binan"
       },
       "geometry": {
         "type": "Polygon",
@@ -6302,11 +6302,11 @@
               "admin_level": "6",
               "boundary": "administrative",
               "land_area": "administrative",
-              "name": "Biñan",
+              "name": "Binan",
               "postal_code": "4024",
               "type": "boundary",
               "wikidata": "Q75961",
-              "wikipedia": "en:Biñan"
+              "wikipedia": "en:Binan"
             }
           }
         ]

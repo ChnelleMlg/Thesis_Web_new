@@ -284,7 +284,7 @@
         "type": "Feature",
         "properties": {
           "place": "Laguna",
-          "city": "Biñan"
+          "city": "Binan"
         },
         "geometry": {
           "type": "Polygon",
@@ -305,7 +305,7 @@
         "type": "Feature",
         "properties": {
           "place": "Laguna",
-          "city": "Biñan"
+          "city": "Binan"
         },
         "geometry": {
           "type": "Polygon",
@@ -2760,7 +2760,7 @@
         "type": "Feature",
         "properties": {
           "place": "Laguna",
-          "city": "Los Baños"
+          "city": "Los Banos"
         },
         "geometry": {
           "type": "Polygon",
@@ -2888,7 +2888,7 @@
         "type": "Feature",
         "properties": {
           "place": "Laguna",
-          "city": "Los Baños"
+          "city": "Los Banos"
         },
         "geometry": {
           "type": "Polygon",
@@ -2943,7 +2943,7 @@
         "type": "Feature",
         "properties": {
           "place": "Laguna",
-          "city": "Los Baños"
+          "city": "Los Banos"
         },
         "geometry": {
           "type": "Polygon",
@@ -3036,7 +3036,7 @@
         "type": "Feature",
         "properties": {
           "place": "Laguna",
-          "city": "Los Baños"
+          "city": "Los Banos"
         },
         "geometry": {
           "type": "Polygon",
@@ -3100,7 +3100,7 @@
         "type": "Feature",
         "properties": {
           "place": "Laguna",
-          "city": "Los Baños"
+          "city": "Los Banos"
         },
         "geometry": {
           "type": "Polygon",
