@@ -158,38 +158,40 @@ def generate_yield_chart(municipalities, yields):
 #### REAL TIME PART #####
 def get_phase(day, month):
     """
-    For the first cycle (dates not between March 16 and September 15):
-        - Phase 1: September 16 to October 31
-        - Phase 2: November, December, and January
-        - Phase 3: February to March 15
-        
-    For the second cycle (dates between March 16 and September 15):
-        - Phase 1: March 16 to April 30
-        - Phase 2: May, June, and July
-        - Phase 3: August to September 15
-    """
-    # First determine which cycle the date falls into.
-    # We'll assume that if the date is between March 16 and September 15, it's in the second cycle.
-    if (month > 3 or (month == 3 and day >= 16)) and (month < 9 or (month == 9 and day <= 15)):
-        # Second cycle
-        if (month == 3 and day >= 16) or (month == 4):
-            return 1
-        elif month in [5, 6, 7]:
-            return 2
-        elif month == 8 or (month == 9 and day <= 15):
-            return 3
-    else:
-        # First cycle: either the date is before March 16 or after September 15.
-        # Note: This cycle spans from September 16 through March 15.
-        if (month == 9 and day >= 16) or (month == 10):
-            return 1
-        elif month in [11, 12, 1]:
-            return 2
-        elif month == 2 or (month == 3 and day <= 15):
-            return 3
+    Determines the phase based on the given day and month.
 
-    # Fallback (shouldn't happen if date is valid)
-    return None
+    First cycle (September 16 - March 15):
+        - Phase 1: September 16 - November 15
+        - Phase 2: November 16 - January 15
+        - Phase 3: January 16 - March 15
+
+    Second cycle (March 16 - September 15):
+        - Phase 1: March 16 - May 15
+        - Phase 2: May 16 - July 15
+        - Phase 3: July 16 - September 15
+    """
+
+    # Determine if the date falls into the second cycle (March 16 – September 15)
+    if (month == 3 and day >= 16) or (4 <= month <= 9 and (month != 9 or day <= 15)):
+        # Second Cycle
+        if (month == 3 and day >= 16) or month == 4 or (month == 5 and day <= 15):
+            return 1  # Phase 1
+        elif (month == 5 and day >= 16) or month == 6 or (month == 7 and day <= 15):
+            return 2  # Phase 2
+        elif (month == 7 and day >= 16) or month == 8 or (month == 9 and day <= 15):
+            return 3  # Phase 3
+
+    else:
+        # First Cycle (September 16 – March 15)
+        if (month == 9 and day >= 16) or month == 10 or (month == 11 and day <= 15):
+            return 1  # Phase 1
+        elif (month == 11 and day >= 16) or month == 12 or (month == 1 and day <= 15):
+            return 2  # Phase 2
+        elif (month == 1 and day >= 16) or month == 2 or (month == 3 and day <= 15):
+            return 3  # Phase 3
+
+    return None  # Fallback for invalid inputs
+
 
 def store_prediction_result(result):
     city = result.get('City')
@@ -197,6 +199,10 @@ def store_prediction_result(result):
     month = int(result.get('Month'))
     predicted_yield = float(result.get('Predicted Yield'))  # Convert numpy.float32 to Python float
     phase = get_phase(day, month)
+
+    # 🔄 Determine Season: 1 for first cycle, 2 for second cycle
+    season = 1 if (month >= 9 or month <= 3) else 2  
+
     current_year = datetime.now().year
     date_str = f"{current_year}-{month:02d}-{day:02d}"
 
@@ -226,10 +232,10 @@ def store_prediction_result(result):
 
             # ✅ **Insert only if no duplicate exists**
             insert_query = """
-                INSERT INTO real_time (ID_rice, date, phase, yield)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO real_time (ID_rice, date, phase, season, yield)
+                VALUES (%s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_query, (id_rice, date_str, phase, predicted_yield))
+            cursor.execute(insert_query, (id_rice, date_str, phase, season, predicted_yield))
             conn.commit()
             print("Prediction result inserted successfully.")
     
