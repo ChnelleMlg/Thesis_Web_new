@@ -42,72 +42,59 @@
             </div>
         </nav>
         
-        <section class="content-container">
-            <!-- Left Sidebar (Navigation) -->
-            <div class="sidebar">
-                <ul>
-                    <li><a href="#" onclick="showContent('AgriKA')" class="active">AgriKA</a></li>
-                    <li><a href="#" onclick="showContent('about')">About Us</a></li>
-                    <li><a href="#" onclick="showContent('model')">Yield Prediction</a></li>
-                </ul>
-            </div>
         
-            <!-- Right Content Area -->
-            <div class="content">
-                <div id="AgriKA" class="content-section active">
-                    <section class="two-column-section">
-                        <div class="column left-column">
-                            <h3>AgriKA: Advancing Agricultural Knowledge through Innovation</h3>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                            </p>
-                            <a href="{{ url_for('view') }}">
-                                <button class="learn-more-btn">View Map</button>
-                            </a>
-                            
-                        </div>
-                    
-                        <div class="column right-column">
-                            <img src="{{ url_for('static', filename='images/AgriKA_HomeS.png') }}" alt="AgriKA">
-                        </div>
-                    </section>
-                </div>
-                <div id="about" class="content-section" style="display:none;">
-                    <h2>About Us</h2>
-                    <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas 
-                        molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. 
-                        Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod 
-                        maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum 
-                        necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut 
-                        reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.
-                    </p>
-                </div>
-                <div id="model" class="content-section" style="display:none;">
-                    <h2>Yield Prediction</h2>
-                    <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas 
-                        molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. 
-                        Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod 
-                        maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum 
-                        necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut 
-                        reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.
-                    </p>
-                    <div class="two2-column-section">
-                        <div class="left-column">
-                            <h2>Model</h2>
-                            <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas 
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. 
-                                Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod 
-                                maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.
-                            </p>
-                        </div>
-                        <div class="right-column">
-                            <h2>DATA</h2>
-                        </div>
-                    </div>
-                </div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-image">
+                <img src="{{ url_for('static', filename='images/AgriKA_Home.png') }}" alt="AgriKA Home">
             </div>
-        </section>
-    </div>
+            <div class="hero-text">
+                <h1>About AgriKA</h1>
+                <p>AgriKA: Advancing Agricultural Knowledge through Innovation</p>
+                <p>Empowering farmers through technology and data-driven solutions for a sustainable future.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission & Vision Section -->
+    <section class="about-yield">
+        <div class="About-us">
+            <h2>About Us</h2>
+            <p>To revolutionize precision agriculture by providing accurate yield predictions using AI and satellite data.</p>
+        </div>
+        <div class="yield">
+            <h2>Yield Prediction</h2>
+            <p>To create a smarter agricultural landscape where farmers make informed decisions for maximum efficiency.</p>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team">
+        <h2>Meet Our Team</h2>
+        <div class="team-container">
+            <div class="team-card">
+                <img src="team1.jpg" alt="John Doe">
+                <h3>John Doe</h3>
+                <p>Founder & CEO</p>
+            </div>
+            <div class="team-card">
+                <img src="team2.jpg" alt="John Doe">
+                <h3>John Doe</h3>
+                <p>Lead Data Scientist</p>
+            </div>
+            <div class="team-card">
+                <img src="team3.jpg" alt="John Doe">
+                <h3>John Doe</h3>
+                <p>Agriculture Expert</p>
+            </div>
+            <div class="team-card">
+                <img src="team4.jpg" alt="John Doee">
+                <h3>John Doe</h3>
+                <p>Agriculture Expert</p>
+            </div>
+        </div>
+    </section>
     
     <!-- Footer Section -->
     <footer>
@@ -134,23 +121,46 @@
 </body>
 
 <script>
-    function showContent(sectionId) {
-        
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.style.display = 'none';
+    let slideIndex = 0;
+    let slideTimer;
+    
+    function showSlide(index) {
+        let slides = document.querySelectorAll(".slide");
+        slides.forEach((slide, i) => {
+            slide.classList.toggle("active", i === index);
         });
-
-        const activeSection = document.getElementById(sectionId);
-        if (activeSection) {
-            activeSection.style.display = 'block';
-        }
-
-        document.querySelectorAll('.sidebar a').forEach(link => {
-            link.classList.remove('active');
-        });
-
-        document.querySelector(`.sidebar a[onclick="showContent('${sectionId}')"]`).classList.add('active');
+        slideIndex = index;
     }
+    
+    function nextSlide() {
+        resetTimer();
+        let slides = document.querySelectorAll(".slide");
+        slideIndex = (slideIndex + 1) % slides.length;
+        showSlide(slideIndex);
+    }
+    
+    function prevSlide() {
+        resetTimer();
+        let slides = document.querySelectorAll(".slide");
+        slideIndex = (slideIndex - 1 + slides.length) % slides.length;
+        showSlide(slideIndex);
+    }
+    
+    function autoSlide() {
+        let slides = document.querySelectorAll(".slide");
+        slideIndex = (slideIndex + 1) % slides.length;
+        showSlide(slideIndex);
+        slideTimer = setTimeout(autoSlide, 5000);
+    }
+    
+    function resetTimer() {
+        clearTimeout(slideTimer);
+        slideTimer = setTimeout(autoSlide, 5000);
+    }
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        slideTimer = setTimeout(autoSlide, 5000);
+    });
 </script>
 
 </html>

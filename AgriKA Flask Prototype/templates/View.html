@@ -72,7 +72,7 @@
                 <!-- Real-Time Content Section -->
                 <div id="realtime-content">
                     <div id="toggle-container">
-                        <!-- Municipality Search -->
+                        <!-- Municipality Search for Real time -->
                         <div class="dropdown-container">
                             <input type="text" id="municipality-search" placeholder="Select municipality" onfocus="showDropdown()" oninput="filterDropdown()" onkeydown="navigateDropdown(event)" autocomplete="off">
                             <span id="clear-search" onclick="clearSearch()">❌</span>
@@ -120,6 +120,14 @@
                 <!-- Historical Content Section (initially hidden) -->
                 <div id="historical-content" style="display: none;">
                     <div id="toggle-container-his">
+                        <!-- Municipality Search for Historical -->
+                        <div class="dropdown-container-his">
+                            <input type="text" id="municipality-search-his" placeholder="Select municipality" autocomplete="off" >
+                            <span id="clear-search-his">❌</span>
+                            <div class="dropdown-wrapper">
+                                <div id="municipality-dropdown-his" class="dropdown-list"></div>
+                            </div>
+                        </div>
 
                         <!-- Graph Toggle Dropdown for Historical View -->
                         <select id="graph-toggle-dropdown-his">
@@ -127,7 +135,7 @@
                             <option value="table">Table</option>
                         </select>
 
-                        <!-- Graph Toggle Dropdown for Historical View -->
+                        <!-- Sort Toggle Dropdown for Historical View -->
                         <select id="sort-dropdown-his">
                             <option value="" disabled selected>Sort Here</option>
                             <option value="asc">Low to High</option>
@@ -164,6 +172,7 @@
                             <thead>
                                 <tr>
                                 <th>Municipality</th>
+                                <th>Year</th>
                                 <th>Yield (t/ha)</th>
                                 </tr>
                             </thead>
@@ -171,6 +180,7 @@
                                 {% for row in historical_yield_data %}
                                 <tr>
                                     <td>{{ row.municipality }}</td>
+                                    <td>{{ row.year }}</td>
                                     <td>{{ row.yield }}</td>
                                 </tr>
                                 {% endfor %}
@@ -242,7 +252,6 @@ document.addEventListener("DOMContentLoaded", function () {
     "SANTA MARIA", "SINILOAN", "VICTORIA"
     ];
 
-
     let originalYieldData = []; 
     let currentChart = null;
 
@@ -268,7 +277,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 100);
     });
 
-    //  --- Search Bar --- //
+    // --- Search Bar for Real Time --- //
     document.getElementById("municipality-search").addEventListener("click", function() {
         showDropdown(); // Show all municipalities when clicked
     });
@@ -297,16 +306,21 @@ document.addEventListener("DOMContentLoaded", function () {
         populateDropdown(filteredMunicipalities);
     }
 
-
     function clearSearch() {
         let input = document.getElementById("municipality-search");
         let clearBtn = document.getElementById("clear-search");
+        let sortDropdown = document.getElementById("sort-dropdown"); // ✅ Get sort dropdown
 
         // ✅ Clear input field
         input.value = "";
 
         // ✅ Hide ❌ button
         clearBtn.style.display = "none";
+
+        // ✅ Show sort dropdown again when clearing selection
+        if (sortDropdown) {
+            sortDropdown.style.display = "block";
+        }
 
         // ✅ Hide dropdown
         document.getElementById("municipality-dropdown").style.display = "none";
@@ -319,7 +333,27 @@ document.addEventListener("DOMContentLoaded", function () {
         updateRealTimeTable(originalYieldData);
     }
 
+
     document.getElementById("clear-search").addEventListener("click", clearSearch);
+
+     // Function to hide dropdown
+     function hiderealDropdown() {
+        let dropdown = document.getElementById("municipality-dropdown");
+        if (dropdown) {
+            dropdown.style.display = "none"; // ✅ Hide the dropdown
+    }
+    }
+
+    // Hide dropdown when scrolling anywhere on the page
+    window.addEventListener("scroll", hiderealDropdown);
+
+    // Hide dropdown when interacting with historical sections
+    ["bar-chart-container", "yield-table-container"].forEach(id => {
+        let element = document.getElementById(id);
+        if (element) {
+            element.addEventListener("wheel", hiderealDropdown); 
+        }
+    });
 
 
     function populateDropdown(items) {
@@ -327,13 +361,13 @@ document.addEventListener("DOMContentLoaded", function () {
         dropdown.innerHTML = ""; // Clear existing items
 
         if (items.length === 0) {
-            dropdown.innerHTML = `<div class="dropdown-item">No results found</div>`;
+            dropdown.innerHTML = `<div class="dropdown-item dropdown-no-results">No results found</div>`;
             return;
         }
 
         items.forEach(m => {
             let option = document.createElement("div");
-            option.className = "dropdown-item";
+            option.className = "dropdown-item dropdown-item-real"; // ✅ Match historical styling
             option.textContent = m;
             
             option.onclick = function() {
@@ -348,6 +382,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let searchInput = document.getElementById("municipality-search");
         let dropdown = document.getElementById("municipality-dropdown");
         let clearBtn = document.getElementById("clear-search");
+        let sortDropdown = document.getElementById("sort-dropdown"); // ✅ Get sort dropdown
 
         // ✅ Set input value to the selected municipality
         searchInput.value = municipality;
@@ -357,6 +392,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // ✅ Hide dropdown
         dropdown.style.display = "none";
+
+        // ✅ Hide sort dropdown when a municipality is selected
+        if (sortDropdown) {
+            sortDropdown.style.display = "none";
+        }
 
         // ✅ Filter data for the selected municipality
         let filteredData = originalYieldData.filter(item => item.municipality === municipality);
@@ -369,7 +409,8 @@ document.addEventListener("DOMContentLoaded", function () {
         updateRealTimeTable(filteredData);
     }
 
-    // ✅ Close dropdown when clicking outside
+
+    //  Close dropdown when clicking outside
     document.addEventListener("click", function(event) {
         let dropdown = document.getElementById("municipality-dropdown");
         let searchInput = document.getElementById("municipality-search");
@@ -379,9 +420,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-
-
-    //  --- End Search Bar --- //
+    // --- End Search Bar --- //
 
 
     function fetchRealTimeData() {
@@ -407,7 +446,7 @@ document.addEventListener("DOMContentLoaded", function () {
         yieldData.forEach(entry => {
             let row = `<tr>
                 <td>${entry.municipality}</td>
-                <td>${entry.yield.toFixed(2)} t/ha</td>
+                <td>${entry.yield}</td>
             </tr>`;
             tableBody.innerHTML += row;
         });
@@ -415,9 +454,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateRealTimeGraph(municipalities, yields) {
         let ctx = document.getElementById("bar-chart").getContext("2d");
+        let container = document.getElementById("bar-chart-container");
+
         if (window.realTimeChart) {
             window.realTimeChart.destroy();
         }
+
+        let isFiltered = municipalities.length < originalYieldData.length; 
+        let chartTitle = "Real Time Yield Data";
+
+        // If no selection is made, show all data
+        if (!isFiltered || municipalities.length === 0) {
+            municipalities = originalYieldData.map(d => d.municipality);
+            yields = originalYieldData.map(d => d.yield);
+        }
+
+        
+        let minHeight = 400; 
+        let barHeight = 30; 
+        let chartHeight = Math.max(minHeight, municipalities.length * barHeight);
+
+        container.style.height = `${chartHeight}px`;
 
         window.realTimeChart = new Chart(ctx, {
             type: "bar",
@@ -430,16 +487,58 @@ document.addEventListener("DOMContentLoaded", function () {
                         let val = parseFloat(y);
                         return val < 3 ? "#d13237" : val < 4 ? "#ffc91f" : val < 5 ? "#69a436" : "#1b499f";
                     }),
-                    borderWidth: 1
+                    borderRadius: 20,
+                    borderWidth: 0,
+                    barThickness: 15,  // ✅ Adjust thickness dynamically
+                    categoryPercentage: 0.6,
+                    barPercentage: 0.8
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                indexAxis: 'y' 
+                indexAxis: 'y',
+                scales: {
+                    x: { 
+                        beginAtZero: true,
+                        grid: { color: "rgba(200, 200, 200, 0.2)", drawBorder: false },
+                        ticks: { maxRotation: 0, autoSkip: true, font: { size: 12, weight: "bold" } }
+                    },
+                    y: { 
+                        ticks: { autoSkip: false, font: { size: 14, weight: "bold" } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                    display: true,
+                    text: chartTitle,
+                    font: { size: 16, weight: "bold" }
+                },
+                    tooltip: {
+                        backgroundColor: "#fff",
+                        titleColor: "#000",
+                        bodyColor: "#333",
+                        borderColor: "#ddd",
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 10
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: "easeInOutQuart"
+                }
             }
         });
+
+        // ✅ Auto-scroll to top when selection changes
+        setTimeout(() => {
+            container.scrollTop = 0;
+        }, 300);
     }
+
+
 
 
     municipalitySearch?.addEventListener("input", function () {
@@ -479,85 +578,302 @@ document.addEventListener("DOMContentLoaded", function () {
     window.historicalDataGlobal = {{ historical_yield_data | tojson | safe }};
     console.log("Historical Data (global):", window.historicalDataGlobal);
 
-    function updateHistoricalView() {
-        let sortDropdownHis = document.getElementById("sort-dropdown-his");
-        let graphToggleHis = document.getElementById("graph-toggle-dropdown-his");
-        let yearDropdown = document.getElementById("year-dropdown-his");
-        let seasonDropdown = document.getElementById("season-dropdown-his");
+    // Get elements
+    const inputField = document.getElementById("municipality-search-his");
+    const clearButton = document.getElementById("clear-search-his");
 
-        let selectedYear = yearDropdown?.value || "";
-        let selectedSeason = seasonDropdown?.value || "";
+    // ✅ Create a fixed wrapper for the dropdown
+    const dropdownWrapper = document.createElement("div");
+    dropdownWrapper.classList.add("fixed-dropdown-wrapper"); // Use external CSS
+    document.body.appendChild(dropdownWrapper);
 
-        if (selectedSeason.toLowerCase() === "season1") selectedSeason = "1";
-        if (selectedSeason.toLowerCase() === "season2") selectedSeason = "2";
+    // ✅ Create dropdown container
+    const dropdownContainer = document.createElement("div");
+    dropdownContainer.id = "municipality-dropdown-his";
+    dropdownContainer.classList.add("dropdown-list");
+    dropdownWrapper.appendChild(dropdownContainer);
 
-        let data = window.historicalDataGlobal.filter(item =>
-            item.year == selectedYear && item.season == selectedSeason
+    // ✅ Function to position dropdown fixed to search bar
+    function positionDropdown() {
+        let rect = inputField.getBoundingClientRect();
+        dropdownContainer.style.top = `${rect.bottom}px`; // Align with bottom of input
+        dropdownContainer.style.left = `${rect.left}px`; // Align left with input
+        dropdownContainer.style.width = `${rect.width}px`; // Match width of input
+        dropdownContainer.style.display = "block"; // Ensure it's visible
+    }
+
+    // ✅ Show dropdown on focus or click
+    inputField?.addEventListener("focus", () => {
+        showMunicipalityDropdown(inputField.value.trim());
+        clearButton.style.display = inputField.value.trim() ? "block" : "none";
+        positionDropdown();
+    });
+
+    inputField?.addEventListener("click", () => {
+        showMunicipalityDropdown(inputField.value.trim());
+        positionDropdown();
+    });
+
+
+    window.addEventListener("resize", () => {
+        if (dropdownContainer.style.display === "block") {
+            positionDropdown();
+        }
+    });
+
+    // ✅ Function to show dropdown and position it correctly
+    function showMunicipalityDropdown(inputText = "") {
+        dropdownContainer.innerHTML = ""; // Clear previous items
+
+        let filteredMunicipalities = municipalities.filter(m =>
+            m.toLowerCase().includes(inputText.toLowerCase().trim())
         );
 
-        if (sortDropdownHis?.value === "asc") {
+        if (filteredMunicipalities.length === 0) {
+            dropdownContainer.style.display = "none";
+            return;
+        }
+
+        positionDropdown(); // Ensure correct positioning before showing
+        dropdownContainer.style.display = "block";
+
+        filteredMunicipalities.forEach(municipality => {
+            let option = document.createElement("div");
+            option.classList.add("dropdown-item-his");
+            option.textContent = municipality;
+
+            option.addEventListener("click", function () {
+                inputField.value = municipality;
+                dropdownContainer.style.display = "none";
+                clearButton.style.display = "block";
+                updateHistoricalView();
+            });
+
+            dropdownContainer.appendChild(option);
+        });
+    }
+
+
+    // ✅ Show clear button when selecting a municipality from dropdown
+    document.addEventListener("click", (event) => {
+        if (event.target.classList.contains("dropdown-item-his")) {
+            clearButton.style.display = "block";
+        }
+    });
+
+    // ✅ Make the Clear Button Clickable & Reset to Default
+    clearButton?.addEventListener("click", function () {
+        
+        // Reset the input field
+        inputField.value = "";
+        
+        // Hide the dropdown
+        dropdownContainer.style.display = "none";
+
+        // Hide the clear button itself
+        clearButton.style.display = "none";
+
+        // Reset the historical view (show all data)
+        updateHistoricalView();
+    });
+
+    window.addEventListener("resize", () => {
+    if (dropdownContainer.style.display === "block") positionDropdown();
+    });
+
+
+    // ✅ Hide dropdown when clicking outside
+    document.addEventListener("click", event => {
+            if (!inputField.contains(event.target) && !dropdownContainer.contains(event.target)) {
+                dropdownContainer.style.display = "none";
+            }
+        });
+        
+    // Function to hide dropdown
+    function hideDropdown() {
+        dropdownContainer.style.display = "none";
+    }
+
+    // Hide dropdown when scrolling anywhere on the page
+    window.addEventListener("scroll", hideDropdown);
+
+    // Hide dropdown when interacting with historical sections
+    ["historical-bar-chart-container", "yield-table-container-his"].forEach(id => {
+        let element = document.getElementById(id);
+        if (element) {
+            element.addEventListener("wheel", hideDropdown); 
+        }
+    });
+
+    // Function to update historical chart
+    function updateHistoricalChart(data) {
+    let canvas = document.getElementById("historical-bar-chart");
+    if (!canvas) return;
+    let ctx = canvas.getContext("2d");
+
+    if (window.historicalChartInstance) {
+        window.historicalChartInstance.destroy();
+    }
+
+    let chartTitleHis = "Historical Yield Data";
+
+    window.historicalChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: data.map(item => `${item.municipality} (${item.year})`), // 👈 Show municipality + year
+            datasets: [{
+                label: "Historical Yield (t/ha)",
+                data: data.map(item => item.yield),
+                backgroundColor: data.map(item => {
+                    let y = parseFloat(item.yield);
+                    return y < 3 ? "#d13237" : y < 4 ? "#ffc91f" : y < 5 ? "#69a436" : "#1b499f";
+                }),
+                borderWidth: 0,
+                borderRadius: 20,
+                barThickness: 15,
+                categoryPercentage: 0.6,
+                barPercentage: 0.7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: { beginAtZero: true, grid: { color: "rgba(200, 200, 200, 0.2)", drawBorder: false } },
+                y: { ticks: { autoSkip: false, font: { size: 14, weight: "bold" } } }
+            },
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: chartTitleHis,
+                    font: { size: 16, weight: "bold" }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: (tooltipItems) => tooltipItems[0].label, 
+                        label: (tooltipItem) => `Yield: ${tooltipItem.raw} t/ha`
+                    },
+                    backgroundColor: "#fff",
+                    titleColor: "#000",
+                    bodyColor: "#333",
+                    borderColor: "#ddd",
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    padding: 10
+                }
+            },
+            animation: { duration: 1000, easing: "easeInOutQuart" }
+        }
+    });
+}
+
+    // Function to update historical table
+    function updateHistoricalTable(data) {
+        let tbody = document.getElementById("historical-table-body-his");
+        if (!tbody) return;
+
+        tbody.innerHTML = data.length === 0 
+            ? "<tr><td colspan='3'>No Data</td></tr>" 
+            : data.map(item => 
+                `<tr>
+                    <td>${item.municipality}</td>  
+                    <td>${item.year}</td>  <!-- 👈 Added a separate column for Year -->
+                    <td>${item.yield === 0 ? "No Data" : item.yield}</td>
+                </tr>`
+            ).join('');
+    }
+
+
+    // Function to update view
+    function updateHistoricalView() {
+        let selectedMunicipality = inputField?.value.trim().toUpperCase() || "";
+        let selectedYear = document.getElementById("year-dropdown-his")?.value || "";
+        let selectedSeason = document.getElementById("season-dropdown-his")?.value || "";
+        let data = window.historicalDataGlobal;
+
+        selectedSeason = selectedSeason.toLowerCase() === "season1" ? "1" : 
+                        selectedSeason.toLowerCase() === "season2" ? "2" : selectedSeason;
+
+        // ✅ If municipality is selected, filter data and hide year/season
+        if (selectedMunicipality && municipalities.includes(selectedMunicipality)) {
+            data = data.filter(item => item.municipality.toUpperCase() === selectedMunicipality);
+            
+            document.getElementById("year-dropdown-his").style.display = "none";
+            document.getElementById("season-dropdown-his").style.display = "none";
+        } else {
+            // ✅ If NO municipality is selected, SHOW year & season and apply filters
+            document.getElementById("year-dropdown-his").style.display = "block";
+            document.getElementById("season-dropdown-his").style.display = "block";
+
+            data = window.historicalDataGlobal.filter(item => 
+                (!selectedYear || item.year == selectedYear) && 
+                (!selectedSeason || item.season == selectedSeason)
+            );
+        }
+
+        // ✅ Always Show Sorting & Graph Toggle
+        document.getElementById("graph-toggle-dropdown-his").style.display = "block";
+        document.getElementById("sort-dropdown-his").style.display = "block";
+
+        // ✅ Sorting Logic
+        let sortOrder = document.getElementById("sort-dropdown-his")?.value;
+        if (sortOrder === "asc") {
             data.sort((a, b) => parseFloat(a.yield) - parseFloat(b.yield));
-        } else if (sortDropdownHis?.value === "desc") {
+        } else if (sortOrder === "desc") {
             data.sort((a, b) => parseFloat(b.yield) - parseFloat(a.yield));
         }
 
-        // ✅ Corrected IDs
-        let barChartContainer = document.getElementById("historical-bar-chart-container");
-        let tableContainer = document.getElementById("yield-table-container-his"); // ✅ Fixed ID
+        // ✅ Ensure Empty Data Still Displays Correctly
+        if (data.length === 0) {
+            data = window.historicalDataGlobal;
+        }
 
-        if (graphToggleHis?.value === "bar") {
-            if (barChartContainer) barChartContainer.style.display = "block";
-            if (tableContainer) tableContainer.style.display = "none"; // ✅ Hide table
+        // ✅ Ensure Graph Toggle Works
+        let toggleValue = document.getElementById("graph-toggle-dropdown-his")?.value;
+        if (toggleValue === "bar") {
+            document.getElementById("historical-bar-chart-container").style.display = "block";
+            document.getElementById("yield-table-container-his").style.display = "none";
             updateHistoricalChart(data);
-        } else if (graphToggleHis?.value === "table") {
-            if (barChartContainer) barChartContainer.style.display = "none";
-            if (tableContainer) tableContainer.style.display = "block"; // ✅ Show table
+        } else {
+            document.getElementById("historical-bar-chart-container").style.display = "none";
+            document.getElementById("yield-table-container-his").style.display = "block";
             updateHistoricalTable(data);
         }
     }
 
-
-
-    function updateHistoricalChart(data) {
-        let canvas = document.getElementById("historical-bar-chart");
-        if (!canvas) return;
-        let ctx = canvas.getContext("2d");
-
-        if (window.historicalChartInstance) {
-            window.historicalChartInstance.destroy();
-        }
-
-        window.historicalChartInstance = new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: data.map(item => item.municipality),
-                datasets: [{
-                    label: "Historical Yield (t/ha)",
-                    data: data.map(item => item.yield),
-                    backgroundColor: data.map(item => {
-                        let y = parseFloat(item.yield);
-                        return y < 3 ? "#d13237" : y < 4 ? "#ffc91f" : y < 5 ? "#69a436" : "#1b499f";
-                    }),
-                    borderWidth: 1
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
-        });
-    }
-
-    function updateHistoricalTable(data) {
-        let tbody = document.getElementById("historical-table-body-his");
-        if (!tbody) return;
-        tbody.innerHTML = data.length === 0 ? "<tr><td colspan='2'>No Data</td></tr>" : 
-            data.map(item => `<tr><td>${item.municipality}</td><td>${item.yield}</td></tr>`).join('');
-    }
-
-    document.getElementById("sort-dropdown-his")?.addEventListener("change", updateHistoricalView);
-    document.getElementById("graph-toggle-dropdown-his")?.addEventListener("change", updateHistoricalView);
     document.getElementById("year-dropdown-his")?.addEventListener("change", updateHistoricalView);
     document.getElementById("season-dropdown-his")?.addEventListener("change", updateHistoricalView);
+    document.getElementById("graph-toggle-dropdown-his")?.addEventListener("change", updateHistoricalView);
+    document.getElementById("sort-dropdown-his")?.addEventListener("change", updateHistoricalView);
 
+
+    // Initialize view on load
     updateHistoricalView();
+
+
+    // --- Create Legend Items --- //
+    const legendData = [
+            { color: "#d13237", label: "< 3" },
+            { color: "#ffc91f", label: "3 - 4" },
+            { color: "#69a436", label: "4 - 5" },
+            { color: "#1b499f", label: "> 5" }
+        ];
+        const legendContainer = document.getElementById("legend-container");
+        legendData.forEach(item => {
+            const legendItem = document.createElement("div");
+            legendItem.classList.add("legend-item");
+            const legendBox = document.createElement("div");
+            legendBox.classList.add("legend-box");
+            legendBox.style.backgroundColor = item.color;
+            const legendLabel = document.createElement("span");
+            legendLabel.textContent = item.label;
+            legendItem.appendChild(legendBox);
+            legendItem.appendChild(legendLabel);
+            legendContainer.appendChild(legendItem);
+        });
+        // --- End Legend Items --- //
 });
 
 </script>
