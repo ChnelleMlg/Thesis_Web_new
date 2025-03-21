@@ -26,13 +26,13 @@
     .dropdown-container {
         position: relative !important;
         display: inline-block !important;
-        width: 100% !important; /* Match Historical */
+        width: 100% !important; 
     }
 
     /* Search Input */
     #municipality-search {
         width: 100% !important;
-        padding: 10px !important; /* Match Historical */
+        padding: 10px !important; 
         border: 1px solid #ccc !important;
         padding-right: 30px !important;
         border-radius: 5px !important;
@@ -51,11 +51,11 @@
         border-radius: 5px !important;
         pointer-events: auto !important;
         width: 100% !important;
+        display: none; 
     }
 
-
-    #municipality-dropdown {
-        display: none; 
+    .dropdown-item-real.highlighted {
+        background-color: #f0f0f0;
     }
 
     /* Dropdown Items */
@@ -67,19 +67,17 @@
         transition: background-color 0.2s ease-in-out !important;
     }
 
-    /* ✅ Match Historical Dropdown Hover Effect */
     .dropdown-item:hover {
         background-color: #f0f0f0 !important;
     }
 
-    /* No Results Styling */
     .dropdown-no-results {
         font-style: italic !important;
         color: #888 !important;
         text-align: center !important;
     }
 
-    /* Ensure Label Styling */
+    /* Label Styling */
     label[for="municipality-search"] {
         font-family: 'Montserrat', sans-serif !important;
         font-size: 16px !important;
@@ -163,6 +161,10 @@
     .dropdown-item-his:hover {
         background-color: #f0f0f0;
     }
+
+    .dropdown-item-his.highlighted {
+        background-color: #f0f0f0;
+    }    
 
 
     /* Ensure Label Styling */
