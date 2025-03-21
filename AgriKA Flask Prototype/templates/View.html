@@ -173,6 +173,7 @@
                                 <tr>
                                 <th>Municipality</th>
                                 <th>Year</th>
+                                <th>Season</th>
                                 <th>Yield (t/ha)</th>
                                 </tr>
                             </thead>
@@ -181,6 +182,7 @@
                                 <tr>
                                     <td>{{ row.municipality }}</td>
                                     <td>{{ row.year }}</td>
+                                    <td>{{ row.season }}</td>
                                     <td>{{ row.yield }}</td>
                                 </tr>
                                 {% endfor %}
@@ -315,22 +317,22 @@ document.addEventListener("DOMContentLoaded", function () {
         let input = document.getElementById("municipality-search");
         let clearBtn = document.getElementById("clear-search");
 
-        // ✅ Show ❌ when input has text
+        // Show x when input has text
         clearBtn.style.display = input.value.length > 0 ? "block" : "none";
 
-        // ✅ Filter municipalities but DO NOT update chart/table here
+        // Filter municipalities but DO NOT update chart/table here
         let filteredMunicipalities = municipalities.filter(m => 
             m.toUpperCase().includes(input.value.toUpperCase())
         );
 
-        populateDropdown(filteredMunicipalities); // ✅ Only update dropdown
+        populateDropdown(filteredMunicipalities); 
     }
 
 
     function clearSearch() {
         let input = document.getElementById("municipality-search");
         let clearBtn = document.getElementById("clear-search");
-        let sortDropdown = document.getElementById("sort-dropdown"); // ✅ Get sort dropdown
+        let sortDropdown = document.getElementById("sort-dropdown");
 
         // Clear input field
         input.value = "";
@@ -899,7 +901,8 @@ document.addEventListener("DOMContentLoaded", function () {
             : data.map(item => 
                 `<tr>
                     <td>${item.municipality}</td>  
-                    <td>${item.year}</td>  <!-- 👈 Added a separate column for Year -->
+                    <td>${item.year}</td>
+                    <td>${item.season}</td>
                     <td>${item.yield === 0 ? "No Data" : item.yield}</td>
                 </tr>`
             ).join('');
