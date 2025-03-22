@@ -20,51 +20,178 @@
        margin-top: 50px;
    }
 
-   .dropdown-container {
-    position: relative;
-    display: inline-block;
-    width: 50%;
-}
+   /* ================================
+   Municipality Searchbar Real-time
+   ================================ */
+    .dropdown-container {
+        position: relative !important;
+        display: inline-block !important;
+        width: 100% !important; 
+    }
 
-    /* ================================
-      Municipality Searchbar
-      ================================ */
+    /* Search Input */
     #municipality-search {
+        width: 100% !important;
+        padding: 10px !important; 
+        border: 1px solid #ccc !important;
+        padding-right: 30px !important;
+        border-radius: 5px !important;
+        font-size: 16px !important;
+    }
+
+    /* Dropdown Styling */
+    #municipality-dropdown {
+        position: absolute !important;
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2) !important;
+        z-index: 1000 !important;
+        max-height: 250px !important;
+        overflow-y: auto !important;
+        border-radius: 5px !important;
+        pointer-events: auto !important;
+        width: 100% !important;
+        display: none; 
+    }
+
+    .dropdown-item-real.highlighted {
+        background-color: #f0f0f0;
+    }
+
+    /* Dropdown Items */
+    .dropdown-item {
+        padding: 12px !important;
+        font-size: 16px !important;
+        cursor: pointer !important;
+        border-bottom: 1px solid #eee !important;
+        transition: background-color 0.2s ease-in-out !important;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f0f0f0 !important;
+    }
+
+    .dropdown-no-results {
+        font-style: italic !important;
+        color: #888 !important;
+        text-align: center !important;
+    }
+
+    /* Label Styling */
+    label[for="municipality-search"] {
+        font-family: 'Montserrat', sans-serif !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        color: #333 !important;
+    }
+
+    /* Clear Search Icon */
+    #clear-search {
+        position: absolute !important;
+        right: 10px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        cursor: pointer !important;
+        color: #777 !important;
+        font-size: 16px !important;
+    }
+
+    #clear-search {
+        display: none;
+    }
+
+    #clear-search:hover {
+        color: #333 !important;
+    }
+
+
+
+   /* ================================
+   Municipality Searchbar Historical
+   ================================ */
+    .dropdown-container-his {
+        position: relative;
+        display: inline-block;
         width: 100%;
-        padding: 8px;
+    }
+
+    /* Search Input */
+    #municipality-search-his {
+        width: 100%;
+        padding: 10px;
         border: 1px solid #ccc;
-        border-radius: 4px;
+        padding-right: 30px;
+        border-radius: 5px;
         font-size: 16px;
     }
 
-    label[for="municipality-search"] {
-        font-family: 'Montserrat', sans-serif; 
-        font-size: 16px; 
-        font-weight: bold; 
-        color: #333; 
-    }
-    
-
-    .dropdown-content {
-        display: none;
-        position: absolute;
+    /* Fixed wrapper for dropdown */
+    .fixed-dropdown-wrapper {
+        position: fixed; 
+        top: 0;
+        left: 0;
         width: 100%;
-        background: white;
+        pointer-events: none;
+    }
+
+    /* Dropdown Styling */
+    #municipality-dropdown-his {
+        position: absolute; 
+        background: #fff;
         border: 1px solid #ccc;
-        max-height: 200px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        display: none;
+        max-height: 250px;
         overflow-y: auto;
-        z-index: 10;
+        border-radius: 5px;
+        pointer-events: auto; 
+        width: 100%; 
     }
 
-    .dropdown-content option {
-        padding: 8px;
+    /*  Dropdown Items */
+    .dropdown-item-his {
+        padding: 12px;
+        font-size: 16px;
         cursor: pointer;
-        display: block;
+        border-bottom: 1px solid #eee;
+        transition: background-color 0.2s ease-in-out;
     }
 
-    .dropdown-content option:hover {
+    .dropdown-item-his:hover {
         background-color: #f0f0f0;
     }
+
+    .dropdown-item-his.highlighted {
+        background-color: #f0f0f0;
+    }    
+
+
+    /* Ensure Label Styling */
+    label[for="municipality-search-his"] {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    #clear-search-his {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        display: none; /* Hidden by default */
+        color: #777;
+        font-size: 16px;
+        
+    }
+    
+    #clear-search-his:hover {
+        color: #333;
+    }
+
+
    
    /* ================================
       Footer Styles
@@ -252,13 +379,12 @@
         height: 1000px;
         overflow-y: auto;
         margin: 20px auto;
-        background-color: #e2dcdc;
         border: 1px solid #ddd;
         padding: 10px;
    }
    
    /* Table Container */
-   #table-container {
+   #yield-table-container {
        margin-top: 10px;
    }
    #data-table {
@@ -274,7 +400,25 @@
    #data-table th {
        background-color: #f2f2f2;
    }
-   
+
+   /* Historical Table Container */
+   #yield-table-container-his {
+    margin-top: 10px;
+    }
+    #data-table-his {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    #data-table-his th,
+    #data-table-his td {
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+    #data-table-his th {
+        background-color: #f2f2f2;
+    }
+    
    
    /* ================================
       Background Sections
@@ -365,7 +509,14 @@
        border-radius: 10px;
        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
    }
-   
+
+   #yield-table-container-his {
+    max-width: auto;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
    .styled-table {
        width: 100%;
        border-collapse: collapse;
@@ -449,7 +600,6 @@
     height: 1000px;
     overflow-y: auto;
     margin: 20px auto;
-    background-color: #e2dcdc;
     border: 1px solid #ddd;
     padding: 10px;
     }   
@@ -522,6 +672,17 @@
        width: 100%;
        margin-bottom: 5px;
    }
+
+   /* Toggle Container */
+   #toggle-container-his {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 5px;
+    }
+    
    /* Toggle Buttons Container */
    #toggle-buttons {
        display: flex;
@@ -556,19 +717,7 @@
        color: #ffb902;
    }
 
-   #clear-search {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    display: none;
-    font-size: 16px;
-    color: gray;
-    background: white;
-    padding: 0 5px;
-    z-index: 10;  /* ✅ Ensures it's on top */
-    }
+
 
    /* Graph Button Styles */
    .graph-btn {
@@ -597,6 +746,22 @@
    #sort-dropdown option[disabled] {
        color: gray;
    }
+
+   #sort-dropdown-his {
+    padding: 8px 7px;
+    font-size: 14px;
+    cursor: pointer;
+    color: gray;
+    height: 40px;
+    font-weight: bold;
+    border: none;
+    outline: none;
+    background: transparent;
+    }
+    #sort-dropdown-his option[disabled] {
+        color: gray;
+    }
+
    
    /* Graph Toggle Dropdown Styles */
    #graph-toggle-dropdown {
@@ -613,6 +778,54 @@
    #graph-dropdown option[disabled] {
        color: gray;
    }
+
+   #graph-toggle-dropdown-his {
+    padding: 8px 7px;
+    font-size: 14px;
+    cursor: pointer;
+    color: gray;
+    height: 40px;
+    font-weight: bold;
+    border: none;
+    outline: none;
+    background: transparent;
+    }
+    #graph-dropdown-his option[disabled] {
+        color: gray;
+    }
+
+    /* Year Toggle Dropdown Styles */
+   #year-dropdown-his {
+    padding: 8px 7px;
+    font-size: 14px;
+    cursor: pointer;
+    color: gray;
+    height: 40px;
+    font-weight: bold;
+    border: none;
+    outline: none;
+    background: transparent;
+    }
+    #year-dropdown-his option[disabled] {
+        color: gray;
+    }
+
+    /* Season Toggle Dropdown Styles */
+   #season-dropdown-his {
+    padding: 8px 7px;
+    font-size: 14px;
+    cursor: pointer;
+    color: gray;
+    height: 40px;
+    font-weight: bold;
+    border: none;
+    outline: none;
+    background: transparent;
+    }
+    #season-dropdown-his option[disabled] {
+        color: gray;
+    }
+   
    
    /* ================================
       Miscellaneous

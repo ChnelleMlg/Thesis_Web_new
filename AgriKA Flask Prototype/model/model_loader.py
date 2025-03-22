@@ -11,8 +11,8 @@ class ModelLoader:
         self.yield_results = []
 
         # Load Model
-        self.model = load_model(r"C:\xampp\htdocs\Thesis_Web_new\AgriKA Flask Prototype\model\cnn_lstm_yield_prediction_model.h5")
-        self.weather_features = ["Temperature (Celsius)"]
+        self.model = load_model(r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\model\model_v2.keras")
+        self.weather_features = ["Temperature (Celsius)", "Rainfall (mm)", "Humidity (%)"]
         self.scaler = MinMaxScaler()
 
     def fit_scaler(self):
@@ -26,12 +26,13 @@ class ModelLoader:
             city = entry["City/Municipality"]
             day = entry["Day"]
             month = entry["Month"]
-            weather_data = entry.get("Temperature (Celsius)", 0)  # Fixed typo
+            weather_data = [entry.get(feature, 0) for feature in self.weather_features]
             image_features = entry["Image_Features"]
 
             try:
                 features = self.preprocess_input(city, day, month, weather_data, image_features)
                 predicted_yield = self.model.predict(features)[0][0]
+                print("PREDICTED YIELD: ", predicted_yield)
 
                 result = {
                     "City": city,
@@ -53,13 +54,21 @@ class ModelLoader:
         Prepares a new input sample for yield prediction.
         """
         # Convert temperature data into a DataFrame
-        weather_df = pd.DataFrame([[weather_data]], columns=self.weather_features)
+        weather_df = pd.DataFrame([weather_data], columns=self.weather_features)
 
         # Scale the temperature
         weather_scaled = self.scaler.transform(weather_df).flatten()  # ✅ No mismatch errors!
 
+        green_ratio = next((entry["Green_Ratio"] for entry in self.merged_data 
+                        if entry["City/Municipality"] == city and 
+                           entry["Day"] == day and 
+                           entry["Month"] == month), 0)
+        
+        final_features = np.append(weather_scaled, green_ratio)
+        print(final_features)
+
         # Combine image features and scaled temperature
-        X_new = np.hstack([image_features, weather_scaled])
+        X_new = np.hstack([image_features, final_features])
 
         # Reshape into sequence format expected by LSTM
         num_timesteps = 3

@@ -8,15 +8,16 @@ from model.variablescollection import *
 from model.model_loader import *
 from model.db import *
 
-sys.path.insert(0, r"C:\xampp\htdocs\Thesis_Web_new\AgriKA Flask Prototype")
+sys.path.insert(0, r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype")
 
 app = Flask(__name__)
 scheduler = APScheduler()
 
-@scheduler.task('date', id='sentinel_get')
+@scheduler.task('interval', id='sentinel_get', minutes=20)
 def sentinel_get():
+
     print("\n\n\nSENTINEL WORKING\n\n\n")
-    filepath = r"C:\xampp\htdocs\Thesis_Web_new\AgriKA Flask Prototype\static\fields_coordinates.geojson"
+    filepath = r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\static\fields_coordinates.geojson"
     
     # Sentinel acc ni Robby
     config = SHConfig()
@@ -46,6 +47,7 @@ def sentinel_get():
     # Fit the scaler once on the merged dataset
     cnn_model_instance.fit_scaler()
 
+
 @app.route('/get_real_time_data')
 def get_real_time_data():
     """Fetch real-time yield data dynamically via AJAX."""
@@ -59,7 +61,7 @@ def get_real_time_data():
             "yields": yields,
             "yield_data": yield_data  # ✅ Include yield_data in JSON response
         })
-        print("🔹 JSON Response:", response.get_data(as_text=True))  # Debugging output
+        #print("🔹 JSON Response:", response.get_data(as_text=True))  # Debugging output
         return response
 
     except Exception as e:
@@ -74,6 +76,8 @@ def home():
 @app.route('/view')
 def view():
     create_map()
+    create_all_historical_maps()
+    create_maps_per_municipality()
 
     try:
         municipalities, yields, yield_data = get_realtime_yield_data()  #Unpacking three values ✅ 
