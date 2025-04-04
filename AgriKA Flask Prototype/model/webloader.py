@@ -40,13 +40,25 @@ municipality_coords = {
 }
 
 def get_color(yield_value):
-    if yield_value == "No data":
+    if yield_value == "No data" or yield_value == 0:
         return "#808080"
     elif yield_value < 3:
         return "#d13237"
     elif 3 <= yield_value < 4:
         return "#ffc91f"
     elif 4 <= yield_value < 5:
+        return "#69a436"
+    else:
+        return "#1b499f"
+    
+def get_color_realtime(yield_value):
+    if yield_value == "No data" or yield_value == 0:
+        return "#808080"
+    elif yield_value < 0.75:
+        return "#d13237"
+    elif 0.75 <= yield_value < 1.5:
+        return "#ffc91f"
+    elif 1.5 <= yield_value < 2.25:
         return "#69a436"
     else:
         return "#1b499f"
@@ -103,7 +115,7 @@ def create_map():
                         feature,
                         name=municipality_name,
                         style_function=lambda feature, y=yield_value: {
-                            "fillColor": get_color(y),
+                            "fillColor": get_color_realtime(y),
                             "color": "black",
                             "weight": 2,
                             "fillOpacity": 0.7,

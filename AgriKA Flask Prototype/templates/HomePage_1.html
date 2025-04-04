@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CALABARZON Map</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesHome.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Josefin Sans'>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href='https://fonts.googleapis.com/css?family=Source Sans Pro' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div id="container">
+        <!-- Navigation Bar -->
+        <nav>
+            <div class="nav-container">
+              <!-- Logo Section -->
+              <div class="nav-logo">
+                <a href="{{ url_for('home') }}">
+                  <img src="{{ url_for('static', filename='images/AgriKA.png') }}" alt="Logo">
+                </a>
+              </div>
+              <!-- Navigation Links -->
+              <ul class="nav-links">
+                <li>
+                  <a href="{{ url_for('home') }}">
+                    <img src="{{ url_for('static', filename='images/Home.png') }}" alt="Home">
+                    <span class="tooltip">Home</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="{{ url_for('view') }}">
+                    <img src="{{ url_for('static', filename='images/Yield.png') }}" alt="Yield">
+                    <span class="tooltip">Yield Map</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+        </nav>
+        
+        <section class="content-container">
+            <!-- Left Sidebar (Navigation) -->
+            <div class="sidebar">
+                <ul>
+                    <li><a href="#" onclick="showContent('AgriKA')" class="active">AgriKA</a></li>
+                    <li><a href="#" onclick="showContent('about')">About Us</a></li>
+                    <li><a href="#" onclick="showContent('model')">Yield Prediction</a></li>
+                </ul>
+            </div>
+        
+            <!-- Right Content Area -->
+            <div class="content">
+                <div id="AgriKA" class="content-section active">
+                    <section class="two-column-section">
+                        <div class="column left-column">
+                            <h3>AgriKA: Advancing Agricultural Knowledge through Innovation</h3>
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+                            </p>
+                            <a href="{{ url_for('view') }}">
+                                <button class="learn-more-btn">View Map</button>
+                            </a>
+                            
+                        </div>
+                    
+                        <div class="column right-column">
+                            <img src="{{ url_for('static', filename='images/AgriKA_HomeS.png') }}" alt="AgriKA">
+                        </div>
+                    </section>
+                </div>
+                <div id="about" class="content-section" style="display:none;">
+                    <h2>About Us</h2>
+                    <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas 
+                        molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. 
+                        Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod 
+                        maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum 
+                        necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut 
+                        reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.
+                    </p>
+                </div>
+                <div id="model" class="content-section" style="display:none;">
+                    <h2>Yield Prediction</h2>
+                    <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas 
+                        molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. 
+                        Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod 
+                        maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum 
+                        necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut 
+                        reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.
+                    </p>
+                    <div class="two2-column-section">
+                        <div class="left-column">
+                            <h2>Model</h2>
+                            <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas 
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. 
+                                Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod 
+                                maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.
+                            </p>
+                        </div>
+                        <div class="right-column">
+                            <h2>DATA</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Footer Section -->
+    <footer>
+        <div class="footer-section">
+        <div class="footer-column">
+            <h4>Connect with Us</h4>
+            <p>
+            <span>AgriKA</span><br>
+            <i class="fas fa-phone"></i> +65 912 123 1234<br>
+            <i class="fas fa-envelope"></i> agrika@gmail.com
+            </p>
+        </div>
+        <div class="footer-column">
+            <h4>Collaborators</h4>
+            <div class="collaborator">
+            <img src="{{ url_for('static', filename='images/Prism.png') }}" alt="PhilRice" class="small-logo">
+            <span class="tooltip">PRiSM</span>
+            </div>
+        </div>
+        </div>
+        <hr>
+        <p class="footer-copy">Copyright © 2025 All Rights Reserved by AgriKA</p>
+    </footer>
+</body>
+
+<script>
+    function showContent(sectionId) {
+        
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
+        });
+
+        const activeSection = document.getElementById(sectionId);
+        if (activeSection) {
+            activeSection.style.display = 'block';
+        }
+
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        document.querySelector(`.sidebar a[onclick="showContent('${sectionId}')"]`).classList.add('active');
+    }
+</script>
+
+</html>

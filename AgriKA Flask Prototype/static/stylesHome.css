@@ -228,6 +228,16 @@
         opacity: 1;
     }
 
+    .nav-label {
+        font-family: 'Oswald', sans-serif;
+        font-size: 20px;
+        color: #ffffff; /* White text */
+        padding-right: 15px;
+        border-radius: 5px;
+        display: inline-block;
+        text-align: center;
+    }
+
 
     /* =================================
     Utility Classes for Images & Tooltips

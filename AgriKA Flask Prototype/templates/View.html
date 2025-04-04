@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CALABARZON Map</title>
+    <title>AgriKA</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Josefin Sans'>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href='https://fonts.googleapis.com/css?family=Source Sans Pro' rel='stylesheet'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Leaflet CSS -->
@@ -45,14 +46,12 @@
               <ul class="nav-links">
                 <li>
                   <a href="{{ url_for('home') }}">
-                    <img src="{{ url_for('static', filename='images/Home.png') }}" alt="Home">
-                    <span class="tooltip">Home</span>
+                    <span class="nav-label">HOME</span>
                   </a>
                 </li>
                 <li>
                   <a href="{{ url_for('view') }}">
-                    <img src="{{ url_for('static', filename='images/Yield.png') }}" alt="Yield">
-                    <span class="tooltip">Yield Map</span>
+                    <span class="nav-label">YIELD DATA</span>
                   </a>
                 </li>
               </ul>
@@ -72,13 +71,6 @@
                 <!-- Real-Time Content Section -->
                 <div id="realtime-content">
                     <div id="toggle-container">
-                        <!-- Municipality Search for Real time -->
-                        <div class="dropdown-container">
-                            <input type="text" id="municipality-search" placeholder="Select municipality" onfocus="showDropdown()" oninput="filterDropdown()" onkeydown="navigateDropdown(event)" autocomplete="off" >
-                            <span id="clear-search" onclick="clearSearch()">❌</span>
-                            <div id="municipality-dropdown" class="dropdown-content"></div>
-                        </div>
-
                         <!-- Graph Toggle Dropdown for Real-Time View -->
                         <select id="graph-toggle-dropdown">
                             <option value="bar">Bar Graph</option>
@@ -91,6 +83,15 @@
                             <option value="desc">High to Low</option>
                             <option value="default">Default</option>
                         </select>
+
+                        <!-- Municipality Search for Real time -->
+                        <div class="dropdown-container" style="display: none;">
+                            <input type="text" style="display: none;" id="municipality-search" placeholder="Select municipality" onfocus="showDropdown()" oninput="filterDropdown()" onkeydown="navigateDropdown(event)" autocomplete="off" >
+                            <span style="display: none;" id="clear-search" onclick="clearSearch()">❌</span>
+                            <div  style="display: none;" id="municipality-dropdown" class="dropdown-content"></div>
+                        </div>
+
+                        
                     </div>
                     <!-- Bar Chart Container for Real-Time Data -->
                     <div id="bar-chart-container">
@@ -248,8 +249,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const yieldTableContainer = document.getElementById("yield-table-container");
     const tableBody = document.getElementById("data-table").getElementsByTagName("tbody")[0];
     const municipalities = [
-    "ALAMINOS", "BAY", "CABUYAO", "CALAUAN", "CAVINTI", "BIÑAN", "CALAMBA",
-    "SANTA ROSA", "FAMY", "KALAYAAN", "LILIW", "LOS BAÑOS", "LUISIANA",
+    "ALAMINOS", "BAY", "CABUYAO", "CALAUAN", "CAVINTI", "BINAN", "CALAMBA",
+    "SANTA ROSA", "FAMY", "KALAYAAN", "LILIW", "LOS BANOS", "LUISIANA",
     "LUMBAN", "MABITAC", "MAGDALENA", "MAJAYJAY", "NAGCARLAN", "PAETE",
     "PAGSANJAN", "PAKIL", "PANGIL", "PILA", "RIZAL", "SAN PABLO", "SANTA CRUZ",
     "SANTA MARIA", "SINILOAN", "VICTORIA"
@@ -528,10 +529,10 @@ document.addEventListener("DOMContentLoaded", function () {
         let chartTitle = "Real Time Yield Data";
 
         // If no selection is made, show all data
-        if (!isFiltered || municipalities.length === 0) {
-            municipalities = originalYieldData.map(d => d.municipality);
-            yields = originalYieldData.map(d => d.yield);
-        }
+        //if (!isFiltered || municipalities.length === 0) {
+        //    municipalities = originalYieldData.map(d => d.municipality);
+        //    yields = originalYieldData.map(d => d.yield);
+        //}
 
         
         let minHeight = 400; 
@@ -549,7 +550,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     data: yields,
                     backgroundColor: yields.map(y => {
                         let val = parseFloat(y);
-                        return val < 3 ? "#d13237" : val < 4 ? "#ffc91f" : val < 5 ? "#69a436" : "#1b499f";
+                        return val < 0.75 ? "#d13237" : val < 1.5 ? "#ffc91f" : val < 2.25 ? "#69a436" : "#1b499f";
                     }),
                     borderRadius: 20,
                     borderWidth: 0,
@@ -596,6 +597,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
+        console.log("New Chart Created!");
+
         // Auto-scroll to top when selection changes
         setTimeout(() => {
             container.scrollTop = 0;
@@ -616,10 +619,11 @@ document.addEventListener("DOMContentLoaded", function () {
     sortDropdown?.addEventListener("change", function () {
         let sortedData = [...originalYieldData];
         if (this.value === "asc") {
-            sortedData.sort((a, b) => a.yield - b.yield);
+            sortedData.sort((a, b) => parseFloat(a.yield) - parseFloat(b.yield));
         } else if (this.value === "desc") {
-            sortedData.sort((a, b) => b.yield - a.yield);
+            sortedData.sort((a, b) => parseFloat(b.yield) - parseFloat(a.yield));
         }
+        console.log("\n\n\n\nSorted Data:", sortedData);
         updateRealTimeTable(sortedData);
         updateRealTimeGraph(
             sortedData.map(item => item.municipality),
@@ -632,10 +636,8 @@ document.addEventListener("DOMContentLoaded", function () {
         yieldTableContainer.style.display = this.value === "table" ? "block" : "none";
     });
 
-    setInterval(fetchRealTimeData, 30000);
+    //setInterval(fetchRealTimeData, 30000);
     fetchRealTimeData();
-
-
 
     // --- HISTORICAL CONTENTS --- //
 
@@ -984,29 +986,66 @@ document.addEventListener("DOMContentLoaded", function () {
     updateHistoricalView();
 
     // --- LEGEND ITEMS --- //
-    const legendData = [
-            { color: "#d13237", label: "< 3" },
-            { color: "#ffc91f", label: "3 - 4" },
-            { color: "#69a436", label: "4 - 5" },
-            { color: "#1b499f", label: "> 5" }
-        ];
-        const legendContainer = document.getElementById("legend-container");
+    const legendContainer = document.getElementById("legend-container");
+    const realtimeBtn = document.getElementById("realtime-btn");
+    const historicalBtn = document.getElementById("historical-btn");
+
+    const historicalLegend = [
+        { color: "#d13237", label: "< 3" },
+        { color: "#ffc91f", label: "3 - 4" },
+        { color: "#69a436", label: "4 - 5" },
+        { color: "#1b499f", label: "> 5" }
+    ];
+
+    const realtimeLegend = [
+        { color: "#d13237", label: "< 0.75" },
+        { color: "#ffc91f", label: "0.75 - 1.5" },
+        { color: "#69a436", label: "1.5 - 2.25" },
+        { color: "#1b499f", label: "> 2.25" }
+    ];
+
+    function updateLegend(legendData) {
+        legendContainer.innerHTML = ""; // Clear existing legend
+
+        const legendTitle = document.createElement("div");
+        legendTitle.classList.add("legend-item");
+        legendTitle.textContent = "Avg. Yield (t/ha):";
+        legendContainer.appendChild(legendTitle);
+
         legendData.forEach(item => {
             const legendItem = document.createElement("div");
             legendItem.classList.add("legend-item");
+
             const legendBox = document.createElement("div");
             legendBox.classList.add("legend-box");
             legendBox.style.backgroundColor = item.color;
+
             const legendLabel = document.createElement("span");
             legendLabel.textContent = item.label;
+
             legendItem.appendChild(legendBox);
             legendItem.appendChild(legendLabel);
             legendContainer.appendChild(legendItem);
         });
-        // --- End Legend Items --- //
+    }
 
-        //changes ni perl start
-        const mapFrame = document.getElementById("map-frame");
+    // Default to Real-Time legend
+    updateLegend(realtimeLegend);
+
+    realtimeBtn.addEventListener("click", function () {
+        updateLegend(realtimeLegend);
+        realtimeBtn.classList.add("active");
+        historicalBtn.classList.remove("active");
+    });
+
+    historicalBtn.addEventListener("click", function () {
+        updateLegend(historicalLegend);
+        historicalBtn.classList.add("active");
+        realtimeBtn.classList.remove("active");
+    });
+
+    //changes ni perl start
+    const mapFrame = document.getElementById("map-frame");
     const yearDropdown = document.getElementById("year-dropdown-his");
     const seasonDropdown = document.getElementById("season-dropdown-his");
 
@@ -1019,7 +1058,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         
         let activeTab = document.querySelector(".hist-toggle-btn.active")?.id; // Ensure it exists
-        let municipalityInput = document.getElementById("municipality-search-his").value.trim();
+        let municipalityInput = document.getElementById("municipality-search-his").value.trim()
 
         console.log("Active tab:", activeTab); // Debugging
         console.log("Municipality search:", municipalityInput); // Debugging

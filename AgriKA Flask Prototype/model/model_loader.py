@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from tensorflow.keras.models import load_model
@@ -5,13 +6,17 @@ from sklearn.preprocessing import MinMaxScaler
 from model.db import store_prediction_result
 
 class ModelLoader:
+
     def __init__(self, merged_data):
         self.merged_data = merged_data
         self.weather_df = []
         self.yield_results = []
 
         # Load Model
-        self.model = load_model(r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\model\model_v2.keras")
+        modelpath = r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\model\model_v2.keras"
+        #modelpath = os.path.join(os.getcwd(), "model", "model_v2.keras")
+
+        self.model = load_model(modelpath)
         self.weather_features = ["Temperature (Celsius)", "Rainfall (mm)", "Humidity (%)"]
         self.scaler = MinMaxScaler()
 

@@ -13,11 +13,12 @@ sys.path.insert(0, r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\Agr
 app = Flask(__name__)
 scheduler = APScheduler()
 
-@scheduler.task('interval', id='sentinel_get', minutes=20)
+@scheduler.task('interval', id='sentinel_get', days=5)
 def sentinel_get():
 
     print("\n\n\nSENTINEL WORKING\n\n\n")
     filepath = r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\static\fields_coordinates.geojson"
+    #filepath = os.path.join(os.getcwd(), "static", "fields_coordinates.geojson")
     
     # Sentinel acc ni Robby
     config = SHConfig()
