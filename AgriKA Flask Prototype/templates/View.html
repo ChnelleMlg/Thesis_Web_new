@@ -51,7 +51,7 @@
                 </li>
                 <li>
                   <a href="{{ url_for('view') }}">
-                    <span class="nav-label">YIELD DATA</span>
+                    <span class="nav-label">DATA</span> <!-- Update ni Chan -->
                   </a>
                 </li>
               </ul>
@@ -103,7 +103,7 @@
                            <thead>
                                 <tr>
                                     <th>Municipality</th>
-                                    <th>Yield (t/ha)</th>
+                                    <th>Yield (t/ha)</th>  <!-- update ni chan -->
                                 </tr>
                            </thead>
                            <tbody>
@@ -167,27 +167,22 @@
                     <div id="historical-bar-chart-container">
                         <canvas id="historical-bar-chart"></canvas>
                     </div>
-                    
+                    <!-- update ni chan -->
                     <!-- Yield Table Container for Historical Data (initially hidden) -->
                     <div id="yield-table-container-his" style="display: none;">
+                       <div class="table-header-wrap">
+                            <h3 id="historical-table-title"></h3> <!-- update ni chan -->
+                       </div>
                         <table id="data-table-his" class="styled-table data-table-his">
                             <thead>
                                 <tr>
-                                <th>Municipality</th>
-                                <th>Year</th>
-                                <th>Season</th>
-                                <th>Yield (t/ha)</th>
+                                <!-- JS will populate this -->
+                                <!-- update ni chan -->
                                 </tr>
                             </thead>
                             <tbody id="historical-table-body-his">
-                                {% for row in historical_yield_data %}
-                                <tr>
-                                    <td>{{ row.municipality }}</td>
-                                    <td>{{ row.year }}</td>
-                                    <td>{{ row.season }}</td>
-                                    <td>{{ row.yield }}</td>
-                                </tr>
-                                {% endfor %}
+                                <!-- JS will populate this -->
+                                <!-- update ni chan -->
                             </tbody>
                         </table>
                     </div>  
@@ -835,7 +830,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // --- CHART AND TABLE --- //
     // Function to update historical chart
-    function updateHistoricalChart(data) {
+    // Update ni chan
+    function updateHistoricalChart(data, chartTitle, selectedMunicipality = "") {
     let canvas = document.getElementById("historical-bar-chart");
     if (!canvas) return;
     let ctx = canvas.getContext("2d");
@@ -844,12 +840,15 @@ document.addEventListener("DOMContentLoaded", function () {
         window.historicalChartInstance.destroy();
     }
 
-    let chartTitleHis = "Historical Yield Data";
-
     window.historicalChartInstance = new Chart(ctx, {
         type: "bar",
         data: {
-            labels: data.map(item => `${item.municipality} (${item.year}, Season ${item.season})`), 
+            labels: data.map(item => {
+                    const seasonName = item.season == "1" ? "Wet Season" : "Dry Season";
+                    return selectedMunicipality && municipalities.includes(selectedMunicipality)
+                        ? `${item.year}, ${seasonName}`
+                        : `${item.municipality} (${item.year}, ${seasonName})`;
+                }),
             datasets: [{
                 label: "Historical Yield (t/ha)",
                 data: data.map(item => item.yield),
@@ -869,19 +868,27 @@ document.addEventListener("DOMContentLoaded", function () {
             maintainAspectRatio: false,
             indexAxis: 'y',
             scales: {
-                x: { beginAtZero: true, grid: { color: "rgba(200, 200, 200, 0.2)", drawBorder: false } },
-                y: { ticks: { autoSkip: false, font: { size: 14, weight: "bold" } } }
+                x: {
+                    beginAtZero: true,
+                    grid: { color: "rgba(200, 200, 200, 0.2)", drawBorder: false }
+                },
+                y: {
+                    ticks: {
+                        autoSkip: false,
+                        font: { size: 14, weight: "bold" }
+                    }
+                }
             },
             plugins: {
                 legend: { display: false },
                 title: {
                     display: true,
-                    text: chartTitleHis,
+                    text: chartTitle,
                     font: { size: 16, weight: "bold" }
                 },
                 tooltip: {
                     callbacks: {
-                        title: (tooltipItems) => tooltipItems[0].label, 
+                        title: (tooltipItems) => tooltipItems[0].label,
                         label: (tooltipItem) => `Yield: ${tooltipItem.raw} t/ha`
                     },
                     backgroundColor: "#fff",
@@ -898,33 +905,63 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 }
 
-    // Function to update historical table
-    function updateHistoricalTable(data) {
-        let tbody = document.getElementById("historical-table-body-his");
-        if (!tbody) return;
 
-        tbody.innerHTML = data.length === 0 
-            ? "<tr><td colspan='3'>No Data</td></tr>" 
-            : data.map(item => 
-                `<tr>
-                    <td>${item.municipality}</td>  
-                    <td>${item.year}</td>
-                    <td>${item.season}</td>
-                    <td>${item.yield === 0 ? "No Data" : item.yield}</td>
-                </tr>`
-            ).join('');
+    // Function to update historical table
+    // Update ni chan
+    function updateHistoricalTable(data, selectedMunicipality = "") {
+    let tbody = document.getElementById("historical-table-body-his");
+    if (!tbody) return;
+
+    const hideMunicipalityColumn = selectedMunicipality && municipalities.includes(selectedMunicipality);
+
+    // Set table headers 
+    const headerRow = document.querySelector("#data-table-his thead tr");
+    if (headerRow) {
+        headerRow.innerHTML = `
+            ${!hideMunicipalityColumn ? "<th>Municipality</th>" : ""}
+            <th>Year</th>
+            <th>Season</th>
+            <th>Average Yield (t/ha)</th>
+        `;
     }
+
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${hideMunicipalityColumn ? 3 : 4}">No Data</td></tr>`;
+    } else {
+        tbody.innerHTML = data.map(item => {
+        const season = `${item.season}`.trim();
+            const seasonLabel = season === "1" ? "Wet Season" :
+                                season === "2" ? "Dry Season" :
+                                season;
+            return `
+                <tr>
+                    ${!hideMunicipalityColumn ? `<td>${item.municipality}</td>` : ""}
+                    <td>${item.year}</td>
+                    <td>${seasonLabel}</td>
+                    <td>${item.yield === 0 ? "No Data" : item.yield}</td>
+                </tr>`;
+        }).join('');
+    }
+}
+
+
 
 
     // Function to update view
+    // Update ni chan
     function updateHistoricalView() {
         let selectedMunicipality = inputField?.value.trim().toUpperCase() || "";
+        const hideMunicipalityColumn = selectedMunicipality &&
+        municipalities.map(m => m.toUpperCase()).includes(selectedMunicipality);
         let selectedYear = document.getElementById("year-dropdown-his")?.value || "";
         let selectedSeason = document.getElementById("season-dropdown-his")?.value || "";
         let data = window.historicalDataGlobal;
 
-        selectedSeason = selectedSeason.toLowerCase() === "season1" ? "1" : 
-                        selectedSeason.toLowerCase() === "season2" ? "2" : selectedSeason;
+        if (selectedSeason.toLowerCase() === "season1") {
+            selectedSeason = "1";
+        } else if (selectedSeason.toLowerCase() === "season2") {
+            selectedSeason = "2";
+        }
 
         if (selectedMunicipality && municipalities.includes(selectedMunicipality)) {
             data = data.filter(item => item.municipality.toUpperCase() === selectedMunicipality);
@@ -952,7 +989,15 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("historical-bar-chart-container").style.display = "none";
             document.getElementById("yield-table-container-his").style.display = "block";
 
-            return; 
+            // Show table title even if no data
+            const tableTitle = document.getElementById("historical-table-title");
+            tableTitle.style.display = "block";
+            tableTitle.textContent =
+                selectedMunicipality && municipalities.includes(selectedMunicipality)
+                    ? `Historical Yield for ${selectedMunicipality}`
+                    : "Historical Yield";
+
+            return;
         }
 
         let sortOrder = document.getElementById("sort-dropdown-his")?.value;
@@ -962,15 +1007,31 @@ document.addEventListener("DOMContentLoaded", function () {
             data.sort((a, b) => parseFloat(b.yield) - parseFloat(a.yield));
         }
 
+        // Update ni Chan
         let toggleValue = document.getElementById("graph-toggle-dropdown-his")?.value;
         if (toggleValue === "bar") {
             document.getElementById("historical-bar-chart-container").style.display = "block";
             document.getElementById("yield-table-container-his").style.display = "none";
-            updateHistoricalChart(data);
+            
+            let chartTitle = "Historical Yield";
+            if (selectedMunicipality && municipalities.includes(selectedMunicipality)) 
+            {
+                chartTitle = `Historical Yield for ${selectedMunicipality}`;
+            }
+            updateHistoricalChart(data, chartTitle, selectedMunicipality);
         } else {
             document.getElementById("historical-bar-chart-container").style.display = "none";
             document.getElementById("yield-table-container-his").style.display = "block";
-            updateHistoricalTable(data);
+
+            // ✅ Add table title before rendering table
+            const tableTitle = document.getElementById("historical-table-title");
+            tableTitle.style.display = "block";
+            tableTitle.textContent =
+                selectedMunicipality && municipalities.includes(selectedMunicipality)
+                    ? `Historical Yield Table for ${selectedMunicipality}`
+                    : "Historical Yield Table";
+
+            updateHistoricalTable(data, selectedMunicipality);
         }
         updateMap();
     }

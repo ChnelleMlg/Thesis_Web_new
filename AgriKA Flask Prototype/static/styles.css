@@ -191,6 +191,25 @@
         color: #333;
     }
 
+    /* ================================
+   Chart Title For Histo (Update ni chan)
+   ================================ */
+   .table-header-wrap {
+    background-color: #f2f2f2;
+    padding: 12px 0;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    }
+    
+   #historical-table-title {
+    color:gray;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+    display: none;
+    }
+
 
    
    /* ================================
@@ -201,6 +220,7 @@
         color: #fff;
         padding: 20px;
         text-align: center;
+        font-family: 'Montserrat', sans-serif;
     }
     
     /* Container for the footer columns */
@@ -414,6 +434,7 @@
    /* Historical Table Container */
    #yield-table-container-his {
     margin-top: 10px;
+    background-color: #f2f2f2
     }
     #data-table-his {
         width: 100%;

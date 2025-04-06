@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../Thesis_Web_old"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Thesis_Web"
+	}
+}

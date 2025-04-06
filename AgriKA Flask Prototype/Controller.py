@@ -8,7 +8,7 @@ from model.variablescollection import *
 from model.model_loader import *
 from model.db import *
 
-sys.path.insert(0, r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype")
+sys.path.insert(0, r"C:\Users\ASUS\OneDrive\Documents\GitHub\Thesis_Web\AgriKA Flask Prototype")
 
 app = Flask(__name__)
 scheduler = APScheduler()
@@ -17,7 +17,7 @@ scheduler = APScheduler()
 def sentinel_get():
 
     print("\n\n\nSENTINEL WORKING\n\n\n")
-    filepath = r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\static\fields_coordinates.geojson"
+    filepath = r"C:\Users\ASUS\OneDrive\Documents\GitHub\Thesis_Web\AgriKA Flask Prototype\static\fields_coordinates.geojson"
     #filepath = os.path.join(os.getcwd(), "static", "fields_coordinates.geojson")
     
     # Sentinel acc ni Robby
