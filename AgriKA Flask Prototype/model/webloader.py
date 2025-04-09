@@ -193,19 +193,20 @@ def create_historical_map(year, season):
 
                     tooltip_html = folium.Tooltip(
                         f"""
-                        <div style="font-size: 14px; font-weight: bold;">
+                        <div class="tooltip-municipality" data-municipality="{municipality_name}">
                             🌾 {municipality_name.title()}
                         </div>
-                        <div style="font-size: 12px;">
+                        <div>
                             <b>Year:</b> {year}<br>
                             <b>Season:</b> {season}<br>
-                            <b>Yield:</b> {yield_value if isinstance(yield_value, (int, float)) else '<span style="color: red;">No data</span>'}
+                            <b>Yield:</b> {yield_value}
                         </div>
                         """,
                         sticky=True
                     )
 
-                    folium.GeoJson(
+
+                    geojson_layer = folium.GeoJson(
                         feature,
                         name=municipality_name,
                         style_function=lambda feature, y=yield_value: {
@@ -214,8 +215,93 @@ def create_historical_map(year, season):
                             "weight": 2,
                             "fillOpacity": 0.7,
                         },
-                        tooltip=tooltip_html
+                        tooltip=tooltip_html,
+                        highlight_function=lambda x: {'weight': 3, 'color': 'blue'},
+                        interactive=True  # Make the GeoJSON features interactive
                     ).add_to(m)
+
+                    # Attach the feature to the geojson_layer
+                    geojson_layer.feature = feature
+
+    # Inject JavaScript for click handling
+    click_js = """
+    <script>
+        function handleGeoJsonClick(e) {
+            var layer = e.target;
+            console.log("Clicked layer:", layer);
+
+            var tooltipId = layer.getAttribute("aria-describedby");
+            var tooltipElement = document.getElementById(tooltipId);
+
+            if (tooltipElement) {
+                var tooltipText = tooltipElement.innerHTML;
+
+                // Extract municipality from data attribute
+                var muniDiv = tooltipElement.querySelector('.tooltip-municipality');
+                var municipality = muniDiv ? muniDiv.dataset.municipality : "Unknown Municipality";
+
+                // Extract year, season, and yield using regex
+                var yearMatch = tooltipText.match(/<b>Year:<\/b> (\d{4})/);
+                var seasonMatch = tooltipText.match(/<b>Season:<\/b> (\w+)/);
+                var yieldMatch = tooltipText.match(/<b>Yield:<\/b> ([\d.]+)/);
+
+                var year = yearMatch ? yearMatch[1] : "Unknown Year";
+                var season = seasonMatch ? seasonMatch[1] : "Unknown Season";
+                var yieldValue = yieldMatch ? yieldMatch[1] : "No Data";
+
+                console.log("📌 Sending:", municipality, year, season, yieldValue);
+
+                fetch('/handle_click', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        municipality: municipality,
+                        year: year,
+                        season: season,
+                        yield: yieldValue
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("✅ Sent to backend:", data);
+
+                    window.top.location.href = '/view?active=historical';
+                })
+                .catch(error => console.error("❌ Error sending to backend:", error));
+            } else {
+                console.log("❌ Tooltip not found for clicked layer.");
+            }
+        }
+
+
+    // Check if the map layers are loaded
+    document.addEventListener("DOMContentLoaded", function() {
+        var interval = setInterval(function() {
+            var geoJsonLayers = document.querySelectorAll('.leaflet-interactive');
+            
+            if (geoJsonLayers.length > 0) {
+                console.log("Map is ready, attaching click handlers.");
+                
+                // Attach click handlers to each GeoJSON layer (only once)
+                geoJsonLayers.forEach(function(layer) {
+                    layer.addEventListener("click", function(event) {
+                        console.log("Click event on GeoJSON layer detected");  // Log click detection
+                        handleGeoJsonClick(event);
+                    });
+                });
+
+                // Stop the interval once layers are ready
+                clearInterval(interval);
+            } else {
+                console.log("❌ Map object is not ready yet.");
+            }
+        }, 100);  // Check every 100ms
+    });
+    </script>
+    """
+    m.get_root().html.add_child(folium.Element(click_js))
 
     if not os.path.exists("static"):
         os.makedirs("static")

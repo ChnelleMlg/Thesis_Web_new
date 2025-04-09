@@ -1,6 +1,6 @@
 # FINAL IMPORTS
 import sys
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request, session
 from flask_apscheduler import APScheduler
 from model.webloader import *
 from model.sentinelcollection import *
@@ -8,16 +8,17 @@ from model.variablescollection import *
 from model.model_loader import *
 from model.db import *
 
-sys.path.insert(0, r"C:\Users\ASUS\OneDrive\Documents\GitHub\Thesis_Web\AgriKA Flask Prototype")
+sys.path.insert(0, r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype")
 
 app = Flask(__name__)
 scheduler = APScheduler()
+app.secret_key = 'your_secret_key'
 
 @scheduler.task('interval', id='sentinel_get', days=5)
 def sentinel_get():
 
     print("\n\n\nSENTINEL WORKING\n\n\n")
-    filepath = r"C:\Users\ASUS\OneDrive\Documents\GitHub\Thesis_Web\AgriKA Flask Prototype\static\fields_coordinates.geojson"
+    filepath = r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\static\fields_coordinates.geojson"
     #filepath = os.path.join(os.getcwd(), "static", "fields_coordinates.geojson")
     
     # Sentinel acc ni Robby
@@ -48,6 +49,23 @@ def sentinel_get():
     # Fit the scaler once on the merged dataset
     cnn_model_instance.fit_scaler()
 
+#changes ni perl
+@app.route('/handle_click', methods=['POST'])
+def handle_click():
+    data = request.get_json()  # Get the incoming JSON data
+    municipality_clicked = data['municipality']
+    year = data['year']
+    season = data['season']
+    yield_value = data['yield']
+
+    session['municipality_clicked'] = municipality_clicked
+    
+    # Do something with the data (e.g., store it in a database, log it, etc.)
+    print(f"Received data: {municipality_clicked}, {year}, {season}, {yield_value}")
+    
+    
+    return jsonify({'status': 'success', 'message': 'Data received successfully'})
+    #return redirect(url_for('view'))
 
 @app.route('/get_real_time_data')
 def get_real_time_data():
@@ -71,14 +89,14 @@ def get_real_time_data():
 
 @app.route('/')
 def home():
+    create_map()
+    create_all_historical_maps()
+    create_maps_per_municipality()
     return render_template('HomePage.html')
 
 
 @app.route('/view')
 def view():
-    create_map()
-    create_all_historical_maps()
-    create_maps_per_municipality()
 
     try:
         municipalities, yields, yield_data = get_realtime_yield_data()  #Unpacking three values ✅ 
@@ -98,14 +116,19 @@ def view():
         print("❌ Error in get_historical_data:", e)
         historical_yield_data = []
     
+    # Get the clicked municipality data from the session
+    municipality_clicked = session.get('municipality_clicked', 'Not clicked')  # Default to 'Not clicked' if not found
+
+    # Pass the data to the template
     return render_template(
         'View.html', 
         municipalities=municipalities, 
         yields=yields, 
-        yield_data=yield_data,  # ✅ Pass yield_data to template
+        yield_data=yield_data,  # Pass yield_data to template
         yield_chart=yield_chart,  
         table_container_id="yield-table-container",
-        historical_yield_data=historical_yield_data
+        historical_yield_data=historical_yield_data,
+        municipality_clicked=municipality_clicked,  # Add clicked data to template
     )
 
 if __name__ == '__main__':

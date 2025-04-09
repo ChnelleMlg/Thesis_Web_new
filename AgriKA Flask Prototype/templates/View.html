@@ -254,6 +254,31 @@ document.addEventListener("DOMContentLoaded", function () {
     let originalYieldData = []; 
     let currentChart = null;
 
+    window.onload = function() {
+        sessionStorage.clear();  // Clear all sessionStorage data
+        console.log("Session Storage Cleared");
+    };
+
+    var municipalityClicked = "{{ municipality_clicked }}"; 
+    const params = new URLSearchParams(window.location.search);
+    const activeButton = params.get('active');  // Get the value of the 'active' parameter
+
+    // Toggle the active class based on the parameter value
+    if (activeButton === 'historical') {
+        document.getElementById('historical-btn').classList.add('active');
+        document.getElementById("realtime-content").style.display = "none";
+        document.getElementById("historical-content").style.display = "block";
+        document.getElementById('realtime-btn').classList.remove('active');
+
+        if (municipalityClicked) {
+            document.getElementById('municipality-search-his').value = municipalityClicked;
+        }
+
+    } else {
+        document.getElementById('realtime-btn').classList.add('active');
+        document.getElementById('historical-btn').classList.remove('active');
+    }
+
     //  --- Toggle Real-Time / Historical Content --- //
     document.getElementById("realtime-btn").addEventListener("click", function () {
         document.getElementById("realtime-content").style.display = "block";
