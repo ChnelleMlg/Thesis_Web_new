@@ -749,6 +749,8 @@
    }
 
 
+   
+
 
    /* Graph Button Styles */
    .graph-btn {
@@ -868,3 +870,188 @@
        display: block;
    }
    
+
+
+
+
+
+
+
+
+
+
+
+   /* DASHBOARD */
+
+
+   .dashboard-title {
+       text-align: center;
+       margin-bottom: 30px;
+       font-family: 'Montserrat', sans-serif;
+   }
+
+   .dashboard-grid {
+       display: flex;
+       justify-content: space-around;
+       gap: 1rem;
+       flex-wrap: wrap;
+       padding: 20px;
+   }
+
+   .metric-card {
+       background: #f5f5f5;
+       padding: 20px;
+       border-radius: 15px;
+       width: 200px;
+       text-align: center;
+       box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+   }
+
+   .dashboard-chart-container {
+       width: 100%;
+       max-width: 800px;
+       margin: 0 auto;
+       padding: 40px;
+   }
+
+   main {
+       flex: 1;
+       /* This pushes the footer to the bottom */
+   }
+
+
+.dropdown-list {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 999;
+    display: none;
+}
+
+#yoy-change-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#yoy-change-table th,
+#yoy-change-table td {
+    padding: 8px 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+#yoy-change-table th {
+    background-color: #f4f4f4;
+}
+
+.center {
+    border: 5px solid;
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+    padding: 10px;
+}
+
+.kpi-animated {
+    transition: all 0.3s ease-in-out;
+    font-weight: bold;
+}
+
+#yield-line-chart-wrapper {
+    position: relative;
+    height: 300px;
+}
+
+#yield-line-chart-wrapper canvas {
+    height: 80% !important;
+    width: 100% !important;
+}
+
+#laguna-line-chart-container,
+#municipality-line-chart-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/*  ZOE CHANGES END START  */
+
+#test-kpi-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center; /* center vertically if needed */
+    padding: 15px;
+    margin-top: 20px;
+    gap: 15px;
+    height: auto; /* <-- this is key */
+    flex-wrap: wrap; /* allows KPIs to wrap on smaller screens */
+}
+
+#kpi-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; /* or use gap */
+    padding: 16px;
+    width: 100%;
+    max-width: 100%; /* container takes full page width */
+    box-sizing: border-box;
+    gap: 16px; /* for even spacing between cards */
+}
+
+/* Individual KPI Card */
+.kpi-card {
+    background-color: #f8f9fa;
+    /* Light background */
+    border: 2px solid #ddd;
+    /* Subtle border */
+    border-radius: 10px;
+    /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Shadow for depth */
+    padding: 20px;
+    text-align: center;
+    flex: 1;
+    /* Equal width for all cards */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* KPI Label */
+.kpi-card span {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    color: #555;
+    /* Subtle text color */
+    margin-bottom: 10px;
+}
+
+/* KPI Number */
+.kpi-card strong {
+    font-size: 32px;
+    /* Larger font size for numbers */
+    font-weight: 700;
+    /* Bold font */
+    color: green;
+}
+
+/* KPI Card Hover Effect */
+.kpi-card:hover {
+    transform: translateY(-5px);
+    /* Slight lift on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    /* Enhanced shadow on hover */
+}
+
+#historical-bar-chart,
+#laguna-average-yield-line-chart,
+#municipality-seasons-bar-chart {
+    height: 600px;
+    /* Set the desired height */
+    width: 100%;
+    /* Ensure the chart spans the full width */
+}

@@ -7,8 +7,9 @@ from model.sentinelcollection import *
 from model.variablescollection import *
 from model.model_loader import *
 from model.db import *
+from services.yield_analytics import *
 
-sys.path.insert(0, r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype")
+sys.path.insert(0, r"C:\xampp\htdocs\Thesis_Web_new\AgriKA Flask Prototype")
 
 app = Flask(__name__)
 scheduler = APScheduler()
@@ -18,7 +19,7 @@ app.secret_key = 'your_secret_key'
 def sentinel_get():
 
     print("\n\n\nSENTINEL WORKING\n\n\n")
-    filepath = r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\static\fields_coordinates.geojson"
+    filepath = r"C:\xampp\htdocs\Thesis_Web_new\AgriKA Flask Prototype\static\fields_coordinates.geojson"
     #filepath = os.path.join(os.getcwd(), "static", "fields_coordinates.geojson")
     
     # Sentinel acc ni Robby
@@ -94,6 +95,34 @@ def home():
     create_maps_per_municipality()
     return render_template('HomePage.html')
 
+# Zoe's Dashboard Update
+@app.route("/dashboard")
+def dashboard():
+    try:
+        municipalities, real_time_yields, real_time_yield_data = get_realtime_yield_data()  #Unpacking three values ✅ 
+    except Exception as e:
+        print("❌ Error in get_realtime_yield_data:", e)
+        municipalities, yields, yield_data = [], [], {}
+    
+    historical_yield_data = get_historical_data()
+
+    yearly_trends = process_yearly_trends(historical_yield_data)
+    municipality_averages = process_municipality_averages(historical_yield_data)
+    seasonal_data = process_seasonal_yield(historical_yield_data)
+
+    return render_template(
+        "dashboard.html",
+        # Pass the real-time yield data to the template
+        municipalities=municipalities,
+        real_time_yields=real_time_yields,
+        real_time_yield_data=real_time_yield_data,
+
+        # Pass the historical yield data to the template
+        historical_yield_data=historical_yield_data,
+        yearly_trends=yearly_trends,
+        municipality_averages=municipality_averages,
+        seasonal_data=seasonal_data,
+    )
 
 @app.route('/view')
 def view():

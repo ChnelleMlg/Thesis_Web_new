@@ -13,7 +13,7 @@ class ModelLoader:
         self.yield_results = []
 
         # Load Model
-        modelpath = r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\model\model_v2.keras"
+        modelpath = r"C:\xampp\htdocs\Thesis_Web_new\AgriKA Flask Prototype\model\model_v2.keras"
         #modelpath = os.path.join(os.getcwd(), "model", "model_v2.keras")
 
         self.model = load_model(modelpath)
