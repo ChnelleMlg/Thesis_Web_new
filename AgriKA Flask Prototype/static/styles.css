@@ -585,21 +585,21 @@
    #legend-container {
        display: flex;
        justify-content: center;
-       align-items: center;
-       gap: 50px;
+       align-items: center; 
+       gap: 25px;
        width: 100%;
    }
    .legend-item {
        display: flex;
        align-items: center;
-       gap: 8px;
-       font-size: 16px;
+       gap: 5px;
+       font-size: 12px;
        font-weight: bold;
        color: #333;
    }
    .legend-box {
-       width: 20px;
-       height: 20px;
+       width: 15px;
+       height: 15px;
        border-radius: 4px;
    }
    
@@ -612,7 +612,7 @@
        display: flex;
        flex-direction: column;
        align-items: center;
-       width: 60%;
+       width: 40%;
        height: calc(100vh - 80px);
    }
    
@@ -660,7 +660,7 @@
    #sidebar-container {
        display: flex;
        flex-direction: column;
-       width: 40%;
+       width: 35%;
        height: calc(100vh - 80px);
    }
    #sidebar-top-container {
@@ -689,6 +689,17 @@
        border-radius: 10px;
        box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.3);
    }
+
+   #cards-container {
+        display: flex;
+        flex-grow: 1;
+        margin-left: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 25%;
+        height: calc(100vh - 80px);
+    }
    
    
    /* ================================
@@ -977,13 +988,14 @@
     left: 0;
     right: 0;
     bottom: 0;
+    flex: 1;
 }
 
 /*  ZOE CHANGES END START  */
 
 #test-kpi-container {
     display: flex;
-    justify-content: flex-start;
+    /*justify-content: flex-start;*/
     align-items: center; /* center vertically if needed */
     padding: 15px;
     margin-top: 20px;
@@ -995,44 +1007,54 @@
 #kpi-container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between; /* or use gap */
-    padding: 16px;
+    flex-grow: 1;
+    /* justify-content: space-between; or use gap */
+    margin-top: 0;
+    padding: 0px;
     width: 100%;
     max-width: 100%; /* container takes full page width */
     box-sizing: border-box;
     gap: 16px; /* for even spacing between cards */
+    margin-bottom: 10px;
+    
 }
 
 /* Individual KPI Card */
 .kpi-card {
     background-color: #f8f9fa;
     /* Light background */
-    border: 2px solid #ddd;
+    border: 1px solid #ddd;
     /* Subtle border */
     border-radius: 10px;
     /* Rounded corners */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     /* Shadow for depth */
-    padding: 20px;
+    padding: 10px;
+    margin-top: 0px;
     text-align: center;
-    flex: 1;
+    flex: 1 0 45%;
     /* Equal width for all cards */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    display: flex;               /* <-- ADD */
+    flex-direction: column;      /* <-- ADD */
+    justify-content: center;     /* <-- ADD */
+    align-items: center; 
+  
 }
 
 /* KPI Label */
 .kpi-card span {
     display: block;
-    font-size: 16px;
+    font-size: 12px;
     font-weight: bold;
     color: #555;
     /* Subtle text color */
-    margin-bottom: 10px;
 }
 
 /* KPI Number */
 .kpi-card strong {
-    font-size: 32px;
+    font-size: 18px;
     /* Larger font size for numbers */
     font-weight: 700;
     /* Bold font */
@@ -1048,10 +1070,45 @@
 }
 
 #historical-bar-chart,
-#laguna-average-yield-line-chart,
-#municipality-seasons-bar-chart {
-    height: 600px;
+#laguna-average-yield-line-chart {
+    height: 100%;
     /* Set the desired height */
     width: 100%;
     /* Ensure the chart spans the full width */
+}
+
+#municipality-seasons-bar-chart {
+    height: 100%;
+    /* Set the desired height */
+    width: 100%;
+    /* Ensure the chart spans the full width */
+}
+
+/*END CODE NI ZOE*/
+
+#linegraph-container {
+    height: 500px;
+    margin-bottom: 15px;
+    width: 100%;
+    flex-grow: 1;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    background-color: #f4f4f4;
+}
+
+#season-bargraph-container {
+    height: 600px;
+    width: 100%;
+    flex-grow: 0;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    background-color: #f4f4f4;
 }

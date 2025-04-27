@@ -7,9 +7,9 @@ from model.sentinelcollection import *
 from model.variablescollection import *
 from model.model_loader import *
 from model.db import *
-from services.yield_analytics import *
+#from services.yield_analytics import *
 
-sys.path.insert(0, r"C:\xampp\htdocs\Thesis_Web_new\AgriKA Flask Prototype")
+sys.path.insert(0, r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype")
 
 app = Flask(__name__)
 scheduler = APScheduler()
@@ -19,7 +19,7 @@ app.secret_key = 'your_secret_key'
 def sentinel_get():
 
     print("\n\n\nSENTINEL WORKING\n\n\n")
-    filepath = r"C:\xampp\htdocs\Thesis_Web_new\AgriKA Flask Prototype\static\fields_coordinates.geojson"
+    filepath = r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\static\fields_coordinates.geojson"
     #filepath = os.path.join(os.getcwd(), "static", "fields_coordinates.geojson")
     
     # Sentinel acc ni Robby
@@ -54,7 +54,7 @@ def sentinel_get():
 @app.route('/handle_click', methods=['POST'])
 def handle_click():
     data = request.get_json()  # Get the incoming JSON data
-    municipality_clicked = data['municipality']
+    municipality_clicked = data['municipality'].upper() #CHANGE 04-27
     year = data['year']
     season = data['season']
     yield_value = data['yield']
@@ -105,10 +105,11 @@ def dashboard():
         municipalities, yields, yield_data = [], [], {}
     
     historical_yield_data = get_historical_data()
+    municipality_clicked = session.get('municipality_clicked', 'Not clicked')  # Default to 'Not clicked' if not found
 
-    yearly_trends = process_yearly_trends(historical_yield_data)
-    municipality_averages = process_municipality_averages(historical_yield_data)
-    seasonal_data = process_seasonal_yield(historical_yield_data)
+    #yearly_trends = process_yearly_trends(historical_yield_data)
+    #municipality_averages = process_municipality_averages(historical_yield_data)
+    #seasonal_data = process_seasonal_yield(historical_yield_data)
 
     return render_template(
         "dashboard.html",
@@ -119,9 +120,10 @@ def dashboard():
 
         # Pass the historical yield data to the template
         historical_yield_data=historical_yield_data,
-        yearly_trends=yearly_trends,
-        municipality_averages=municipality_averages,
-        seasonal_data=seasonal_data,
+        municipality_clicked=municipality_clicked
+        #yearly_trends=yearly_trends,
+        #municipality_averages=municipality_averages,
+        #seasonal_data=seasonal_data,
     )
 
 @app.route('/view')

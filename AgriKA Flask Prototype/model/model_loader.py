@@ -13,7 +13,7 @@ class ModelLoader:
         self.yield_results = []
 
         # Load Model
-        modelpath = r"C:\xampp\htdocs\Thesis_Web_new\AgriKA Flask Prototype\model\model_v2.keras"
+        modelpath = r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\model\model_v2.keras"
         #modelpath = os.path.join(os.getcwd(), "model", "model_v2.keras")
 
         self.model = load_model(modelpath)
@@ -63,29 +63,29 @@ class ModelLoader:
 
         # Scale the temperature
         weather_scaled = self.scaler.transform(weather_df).flatten()  # ✅ No mismatch errors!
-
-	if (month == 3 and day >= 16) or (4 <= month <= 9 and (month != 9 or day <= 15)):
-        	# Second Cycle
-        	if (month == 3 and day >= 16) or month == 4 or (month == 5 and day <= 15):
-            		phase = 1  # Phase 1
-        	elif (month == 5 and day >= 16) or month == 6 or (month == 7 and day <= 15):
-            		phase = 2  # Phase 2
-        	elif (month == 7 and day >= 16) or month == 8 or (month == 9 and day <= 15):
-            		phase = 3  # Phase 3
-
-    	else:
-        	# First Cycle (September 16 – March 15)
-        	if (month == 9 and day >= 16) or month == 10 or (month == 11 and day <= 15):
-            		phase = 1  # Phase 1
-        	elif (month == 11 and day >= 16) or month == 12 or (month == 1 and day <= 15):
-            		phase = 2  # Phase 2
-        	elif (month == 1 and day >= 16) or month == 2 or (month == 3 and day <= 15):
-            		phase = 3  # Phase 3
+        
+        if (month == 3 and day >= 16) or (4 <= month <= 9 and (month != 9 or day <= 15)):
+            # Second Cycle
+            if (month == 3 and day >= 16) or month == 4 or (month == 5 and day <= 15):
+                phase = 1  # Phase 1
+            elif (month == 5 and day >= 16) or month == 6 or (month == 7 and day <= 15):
+                phase = 2  # Phase 2
+            elif (month == 7 and day >= 16) or month == 8 or (month == 9 and day <= 15):
+                phase = 3  # Phase 3
+        else:
+            # First Cycle (September 16 – March 15)
+            if (month == 9 and day >= 16) or month == 10 or (month == 11 and day <= 15):
+                phase = 1  # Phase 1
+            elif (month == 11 and day >= 16) or month == 12 or (month == 1 and day <= 15):
+                phase = 2  # Phase 2
+            elif (month == 1 and day >= 16) or month == 2 or (month == 3 and day <= 15):
+                phase = 3  # Phase 3
 
         green_ratio = next((entry["Green_Ratio"] for entry in self.merged_data 
-                        if entry["City/Municipality"] == city and 
-                           entry["Day"] == day and 
-                           entry["Month"] == month), 0)
+                            if entry["City/Municipality"] == city and 
+                            entry["Day"] == day and 
+                            entry["Month"] == month), 0)
+
         
         final_features = np.append(weather_scaled, green_ratio, phase)
         print(final_features)

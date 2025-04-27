@@ -31,59 +31,33 @@
 
 </head>
 <body>
-    <div class="container-fluid">
-        <div id="kpi-container">
-            <div id="kpi-1" class="kpi-card">
-                <span id="kpi-1-label">Predicted Avg Yield:</span>
-                <strong id="kpi-1-value">4.5 t/ha</strong>
-            </div>
-            <div id="kpi-2" class="kpi-card">
-                <span id="kpi-2-label">Predicted Avg Yield:</span>
-                <strong id="kpi-2-value">4.5 t/ha</strong>
-            </div>
-            <div id="kpi-3" class="kpi-card">
-                <span id="kpi-3-label">Predicted Avg Yield:</span>
-                <strong id="kpi-3-value">4.5 t/ha</strong>
-            </div>
-            <div id="kpi-4" class="kpi-card">
-                <span id="kpi-4-label">Predicted Avg Yield:</span>
-                <strong id="kpi-4-value">4.5 t/ha</strong>
-            </div>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-container">
+          <!-- Logo Section -->
+          <div class="nav-logo">
+            <a href="{{ url_for('home') }}">
+              <img src="{{ url_for('static', filename='images/AgriKA.png') }}" alt="Logo">
+            </a>
+          </div>
+          <!-- Navigation Links -->
+          <ul class="nav-links">
+            <li>
+              <a href="{{ url_for('home') }}">
+                <span class="nav-label">HOME</span>
+              </a>
+            </li>
+            <li>
+                <a href="{{ url_for('dashboard') }}">
+                    <span class="nav-label">DATA ANALYTICS</span> <!-- Added Analytics Nav Update -->
+                </a>
+            </li>
+          </ul>
         </div>
-    </div>
-
+    </nav>
+    
     <!-- Main Container -->
     <div id="container">
-        <!-- Navigation Bar -->
-        <nav>
-            <div class="nav-container">
-              <!-- Logo Section -->
-              <div class="nav-logo">
-                <a href="{{ url_for('home') }}">
-                  <img src="{{ url_for('static', filename='images/AgriKA.png') }}" alt="Logo">
-                </a>
-              </div>
-              <!-- Navigation Links -->
-              <ul class="nav-links">
-                <li>
-                  <a href="{{ url_for('home') }}">
-                    <span class="nav-label">HOME</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="{{ url_for('view') }}">
-                    <span class="nav-label">DATA</span> <!-- Update ni Chan -->
-                  </a>
-                </li>
-                <li>
-                    <a href="{{ url_for('dashboard') }}">
-                        <span class="nav-label">ANALYTICS</span> <!-- Added Analytics Nav Update -->
-                    </a>
-                </li>
-              </ul>
-            </div>
-        </nav>
-        
         <!-- Sidebar Container -->
         <div id="sidebar-container">
             <!-- Sidebar Top: Toggle Buttons for Real-Time / Historical Views -->
@@ -195,13 +169,17 @@
                         <canvas id="historical-bar-chart"></canvas>
                     </div>
 
+                    <!--
                     <div id="line-chart-container" style="display: none;">
                         <canvas id="laguna-average-yield-line-chart"></canvas>
                     </div>
+                    
 
                     <div id="municipality-seasons-bar-chart-container" style="display: none;">
                         <canvas id="municipality-seasons-bar-chart"></canvas>
                     </div>
+                    -->
+                    
                     <!-- update ni chan -->
                     <!-- Yield Table Container for Historical Data (initially hidden) -->
                     <div id="yield-table-container-his" style="display: none;">
@@ -222,11 +200,19 @@
                         </table>
                     </div>  
                 </div>
+
             </div>
         </div>
         
-          <!-- Main Content Area -->
+        <!-- Main Content Area -->
         <div id="content-container">
+            <!-- LineGraph Section --> 
+            <div id="linegraph-container" style="display: none;">
+                <div id="line-chart-container" style="display: none;">
+                    <canvas id="laguna-average-yield-line-chart"></canvas>
+                </div>
+            </div>
+
             <!-- Map Section --> 
             <div id="map-container">
                 <iframe id="map-frame" src="{{ url_for('static', filename='map.html') }}" width="100%" height="600px" frameborder="0"></iframe> <!-- changes ni perl start -->
@@ -240,9 +226,36 @@
                     </div>
                 </div>
             </div>
+        </div>  
+        
+        <div id="cards-container">
+            <div id="kpi-container">
+                <div id="kpi-1" class="kpi-card">
+                    <span id="kpi-1-label">Predicted Avg Yield:</span>
+                    <strong id="kpi-1-value">4.5 t/ha</strong>
+                </div>
+                <div id="kpi-2" class="kpi-card">
+                    <span id="kpi-2-label">Predicted Avg Yield:</span>
+                    <strong id="kpi-2-value">4.5 t/ha</strong>
+                </div>
+                <div id="kpi-3" class="kpi-card">
+                    <span id="kpi-3-label">Predicted Avg Yield:</span>
+                    <strong id="kpi-3-value">4.5 t/ha</strong>
+                </div>
+                <div id="kpi-4" class="kpi-card">
+                    <span id="kpi-4-label">Predicted Avg Yield:</span>
+                    <strong id="kpi-4-value">4.5 t/ha</strong>
+                </div>
             </div>
-        </div>   
+            <div id="season-bargraph-container" style="display: none;">
+                <div id="municipality-seasons-bar-chart-container" style="display: none;">
+                    <canvas id="municipality-seasons-bar-chart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
+
+    
 
     <!-- Footer Section -->
     <footer>
@@ -295,6 +308,9 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     // zoe changes start
+
+    window.historicalDataGlobal = {{ historical_yield_data | tojson | safe }};
+    console.log("Historical Data (global):", window.historicalDataGlobal);
     
     // Ensure historical data is loaded
     if (window.historicalDataGlobal && window.historicalDataGlobal.length > 0) {
@@ -318,7 +334,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (municipalityClicked) {
             document.getElementById('municipality-search-his').value = municipalityClicked;
+            document.getElementById("linegraph-container").style.display = "flex";
+            document.getElementById("line-chart-container").style.display = "block";
+            document.getElementById("season-bargraph-container").style.display = "flex";
+            document.getElementById("municipality-seasons-bar-chart-container").style.display = "block";
+            
+            setTimeout(() => {
+                updateMunicipalityKPIs(municipalityClicked);
+                renderYieldChart(municipalityClicked);
+                renderMunicipalityYieldBarChart(municipalityClicked);
+            }, 100);  // wait 100 milliseconds
+        }else {
+            // Render chart for Laguna's average yields
+            renderYieldChart();
         }
+
 
     } else {
         document.getElementById('realtime-btn').classList.add('active');
@@ -345,6 +375,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Hide the line chart container
+        document.getElementById("season-bargraph-container").style.display = "none";
+        document.getElementById("municipality-seasons-bar-chart-container").style.display = "none";
+        document.getElementById("linegraph-container").style.display = "none";
         document.getElementById("line-chart-container").style.display = "none";
         // ZOE CHANGES END 
 
@@ -359,22 +392,24 @@ document.addEventListener("DOMContentLoaded", function () {
         // Reset real-time section when switching to historical
         resetRealTimeSection();
 
-        // Re-render chart after showing historical content
-        setTimeout(function () {
-            if (typeof myChart !== "undefined") {
-                myChart.resize();
-            }
-        }, 100);
-
         updateMap(); //changes ni perl
 
         // zoe changes 
         updateHistoricalKPIs(); // Update historical KPIs when switching to historical view
         // Render the Laguna Average Yield Line Chart
-        renderLagunaAverageYieldChart();
-
+        
         // Ensure the line chart container is visible
+        document.getElementById("linegraph-container").style.display = "flex";
         document.getElementById("line-chart-container").style.display = "block";
+
+        // Re-render chart after showing historical content
+        setTimeout(function () {
+            if (typeof myChart !== "undefined") {
+                myChart.resize();
+            }
+            renderLagunaAverageYieldChart();
+
+        }, 100);
 
     });
 
@@ -448,6 +483,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateMunicipalityKPIs(selectedMunicipality) {
+        updateKPI("kpi-1-label", "kpi-1-value", "Avg Municipality Yield:", "");
+        updateKPI("kpi-2-label", "kpi-2-value", "Laguna Yield Rank:", "");
+        updateKPI("kpi-3-label", "kpi-3-value", "% Above Laguna Avg:", "");
+        updateKPI("kpi-4-label", "kpi-4-value", "% Change vs. Previous Season:", "");
 
         // Filter data for the selected municipality
         const municipalityData = window.historicalDataGlobal.filter(item => item.municipality.toUpperCase() === selectedMunicipality.toUpperCase());
@@ -904,8 +943,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // --- HISTORICAL CONTENTS --- //
 
-    window.historicalDataGlobal = {{ historical_yield_data | tojson | safe }};
-    console.log("Historical Data (global):", window.historicalDataGlobal);
+   
 
     function clearHistoricalSearch() {
         let inputField = document.getElementById("municipality-search-his"); 
@@ -1028,9 +1066,10 @@ document.addEventListener("DOMContentLoaded", function () {
             clearButton.style.display = "block";
 
             // zoe changes
-            const selectedMunicipality = filteredMunicipalities[index]; // Get the selected municipality
             
             updateHistoricalView();
+
+            selectedMunicipality = filteredMunicipalities[index]; // Get the selected municipality
 
             if (selectedMunicipality) {
                 // Call updateMunicipalityKPIs to update the KPIs
@@ -1038,6 +1077,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Render chart for the selected municipality
                 renderYieldChart(selectedMunicipality);
                 // Show the bar chart container
+                document.getElementById("season-bargraph-container").style.display = "flex";
                 document.getElementById("municipality-seasons-bar-chart-container").style.display = "block";
                 renderMunicipalityYieldBarChart(selectedMunicipality);
             } else {
@@ -1092,6 +1132,7 @@ document.addEventListener("DOMContentLoaded", function () {
         updateHistoricalView();
         renderYieldChart(); // zoe change: Render chart for Laguna's average yields 
         // Hide the bar chart container
+        document.getElementById("season-bargraph-container").style.display = "none";
         document.getElementById("municipality-seasons-bar-chart-container").style.display = "none";
     });
 

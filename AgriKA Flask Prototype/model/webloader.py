@@ -152,6 +152,7 @@ def create_map():
 
     if not os.path.exists("static"):
         os.makedirs("static")
+    m.fit_bounds([[13.8, 121.0], [14.6, 121.6]])
     m.save("static/map.html")
 
 def create_historical_map(year, season):
@@ -160,7 +161,7 @@ def create_historical_map(year, season):
     """
     m = folium.Map(
         location=[14.16667, 121.33333],
-        zoom_start=10,
+        zoom_start=8.8,
         tiles="CartoDB Positron",
         attr="© OpenStreetMap contributors, © CartoDB"
     )
@@ -267,7 +268,7 @@ def create_historical_map(year, season):
                 .then(data => {
                     console.log("✅ Sent to backend:", data);
 
-                    window.top.location.href = '/view?active=historical';
+                    window.top.location.href = '/dashboard?active=historical';
                 })
                 .catch(error => console.error("❌ Error sending to backend:", error));
             } else {
@@ -305,6 +306,7 @@ def create_historical_map(year, season):
 
     if not os.path.exists("static"):
         os.makedirs("static")
+    m.fit_bounds([[13.3, 121.0], [14.3, 121.6]])
     m.save("static/historical_map.html")
 
 def create_all_historical_maps():
@@ -365,12 +367,12 @@ def create_maps_per_municipality():
                     # Create a map centered on the municipality
                     m = folium.Map(
                         location=[coords["lat"], coords["lng"]],
-                        zoom_start=coords["zoom"],
+                        zoom_start=11,
                         tiles="CartoDB Positron"
                     )
 
                     # Add filtered municipality boundary with green color
-                    folium.GeoJson(
+                    geojson_layer = folium.GeoJson(
                         filtered_geojson,
                         name=municipality_name,
                         style_function=lambda feature: {
@@ -379,11 +381,25 @@ def create_maps_per_municipality():
                             "weight": 2,
                             "fillOpacity": 0.7,
                         },
-                    ).add_to(m)
+                    )
+                    
+                    geojson_layer.add_to(m)
+
+                    bounds = geojson_layer.get_bounds()
+                    south_lat, west_lng = bounds[0]
+                    north_lat, east_lng = bounds[1]
+
+                    south_lat -= 0.2  # move view downward a bit
+
+                    new_bounds = [[south_lat, west_lng], [north_lat, east_lng]]
+
+                    m.fit_bounds(new_bounds)
 
                     # Save the map
                     filename = f"static/map_{municipality_name.replace(' ', '_')}.html"
+                    
                     m.save(filename)
+                    
                     print(f"✅ Map saved: {filename}")
 
 def generate_yield_chart(municipalities, yields):
