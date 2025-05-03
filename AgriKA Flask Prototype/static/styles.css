@@ -20,6 +20,12 @@
        margin-top: 50px;
    }
 
+   
+   * {
+    box-sizing: border-box;
+}
+
+
    /* ================================
    Municipality Searchbar Real-time
    ================================ */
@@ -388,9 +394,27 @@
        align-items: stretch;
        padding: 15px;
        margin-top: 50px;
-       height: calc(100vh - 50px);
+       min-height: calc(100vh - 50px - footerHeightIfKnown);
+       flex-direction: row; /* Default layout for larger screens */
+       gap: 1rem; /* Optional spacing */
    }
    
+   @media (max-width: 600px) {
+    #container {
+        flex-direction: column;
+    }
+
+    #sidebar-container,
+    #content-container,
+    #cards-container {
+        width: 100% !important;
+        flex: none !important;
+        margin-left: 0 !important;
+    }
+
+        
+    }
+
    
    /* ================================
       Form & Chart Elements
@@ -602,6 +626,8 @@
        height: 15px;
        border-radius: 4px;
    }
+
+   
    
    
    /* ================================
@@ -1078,7 +1104,7 @@
 }
 
 #municipality-seasons-bar-chart {
-    height: 100%;
+    height: auto !important;;
     /* Set the desired height */
     width: 100%;
     /* Ensure the chart spans the full width */
@@ -1112,3 +1138,14 @@
     justify-content: center;
     background-color: #f4f4f4;
 }
+
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }  
+  #container {
+    flex: 1 0 auto;
+  }
+  

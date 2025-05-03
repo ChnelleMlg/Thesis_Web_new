@@ -1161,78 +1161,85 @@ document.addEventListener("DOMContentLoaded", function () {
     // Function to update historical chart
     // Update ni chan
     function updateHistoricalChart(data, chartTitle, selectedMunicipality = "") {
-    let canvas = document.getElementById("historical-bar-chart");
-    if (!canvas) return;
-    let ctx = canvas.getContext("2d");
+        let canvas = document.getElementById("historical-bar-chart");
+        if (!canvas) return;
 
-    if (window.historicalChartInstance) {
-        window.historicalChartInstance.destroy();
-    }
+        if (window.historicalChartInstance) {
+            window.historicalChartInstance.destroy();
+        }
 
-    window.historicalChartInstance = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: data.map(item => {
+        // ✅ Filter out entries where yield is 0 or null/undefined
+        const filteredData = data.filter(item => parseFloat(item.yield) > 0);
+
+        canvas.height = Math.max(50, filteredData.length * 40);
+
+        let ctx = canvas.getContext("2d");
+
+        window.historicalChartInstance = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: filteredData.map(item => {
                     const seasonName = item.season == "1" ? "Wet Season" : "Dry Season";
                     return selectedMunicipality && municipalities.includes(selectedMunicipality)
                         ? `${item.year}, ${seasonName}`
-                        : `${item.municipality} (${item.year}, ${seasonName})`;
+                        : `${item.municipality}`;
                 }),
-            datasets: [{
-                label: "Historical Yield (t/ha)",
-                data: data.map(item => item.yield),
-                backgroundColor: data.map(item => {
-                    let y = parseFloat(item.yield);
-                    return y < 3 ? "#d13237" : y < 4 ? "#ffc91f" : y < 5 ? "#69a436" : "#1b499f";
-                }),
-                borderWidth: 0,
-                borderRadius: 20,
-                barThickness: 15,
-                categoryPercentage: 0.6,
-                barPercentage: 0.7
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y',
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    grid: { color: "rgba(200, 200, 200, 0.2)", drawBorder: false }
-                },
-                y: {
-                    ticks: {
-                        autoSkip: false,
-                        font: { size: 14, weight: "bold" }
-                    }
-                }
+                datasets: [{
+                    label: "Historical Yield (t/ha)",
+                    data: filteredData.map(item => item.yield),
+                    backgroundColor: filteredData.map(item => {
+                        let y = parseFloat(item.yield);
+                        return y < 3 ? "#d13237" : y < 4 ? "#ffc91f" : y < 5 ? "#69a436" : "#1b499f";
+                    }),
+                    borderWidth: 0,
+                    borderRadius: 20,
+                    barThickness: 15,
+                    categoryPercentage: 1.0,
+                    barPercentage: 1.0
+                }]
             },
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: chartTitle,
-                    font: { size: 16, weight: "bold" }
-                },
-                tooltip: {
-                    callbacks: {
-                        title: (tooltipItems) => tooltipItems[0].label,
-                        label: (tooltipItem) => `Yield: ${tooltipItem.raw} t/ha`
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { color: "rgba(200, 200, 200, 0.2)", drawBorder: false }
                     },
-                    backgroundColor: "#fff",
-                    titleColor: "#000",
-                    bodyColor: "#333",
-                    borderColor: "#ddd",
-                    borderWidth: 1,
-                    cornerRadius: 8,
-                    padding: 10
-                }
-            },
-            animation: { duration: 1000, easing: "easeInOutQuart" }
-        }
-    });
-}
+                    y: {
+                        ticks: {
+                            autoSkip: false,
+                            font: { size: 14, weight: "bold" }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: chartTitle,
+                        font: { size: 16, weight: "bold" }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: (tooltipItems) => tooltipItems[0].label,
+                            label: (tooltipItem) => `Yield: ${tooltipItem.raw} t/ha`
+                        },
+                        backgroundColor: "#fff",
+                        titleColor: "#000",
+                        bodyColor: "#333",
+                        borderColor: "#ddd",
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 10
+                    }
+                },
+                animation: { duration: 1000, easing: "easeInOutQuart" }
+            }
+        });
+    }
+
 
 
     // Function to update historical table
@@ -1285,6 +1292,9 @@ document.addEventListener("DOMContentLoaded", function () {
         let selectedYear = document.getElementById("year-dropdown-his")?.value || "";
         let selectedSeason = document.getElementById("season-dropdown-his")?.value || "";
         let data = window.historicalDataGlobal;
+
+        let dropdown = document.getElementById("season-dropdown-his");
+        let selectedSeasonText = dropdown?.options[dropdown.selectedIndex]?.text || "";
 
         if (selectedSeason.toLowerCase() === "season1") {
             selectedSeason = "1";
@@ -1342,7 +1352,7 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("historical-bar-chart-container").style.display = "block";
             document.getElementById("yield-table-container-his").style.display = "none";
             
-            let chartTitle = "Historical Yield";
+            let chartTitle = `Historical Yield for ${selectedSeasonText} of ${selectedYear}`;
             if (selectedMunicipality && municipalities.includes(selectedMunicipality)) 
             {
                 chartTitle = `Historical Yield for ${selectedMunicipality}`;
@@ -1358,7 +1368,7 @@ document.addEventListener("DOMContentLoaded", function () {
             tableTitle.textContent =
                 selectedMunicipality && municipalities.includes(selectedMunicipality)
                     ? `Historical Yield Table for ${selectedMunicipality}`
-                    : "Historical Yield Table";
+                    : `Historical Yield for ${selectedSeasonText} of ${selectedYear}`;
 
             updateHistoricalTable(data, selectedMunicipality);
         }
@@ -1528,6 +1538,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+
     //zoe changes
 
     function renderYieldChart(selectedMunicipality = null) {
@@ -1590,12 +1601,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     datasets: [{
                         label: selectedMunicipality ? `${selectedMunicipality} Yield (t/ha)` : "Laguna Average Yield (t/ha)",
                         data: yields, // Y-axis data (yields)
-                        borderColor: "rgba(54, 162, 235, 1)", // Line color
-                        backgroundColor: "rgba(54, 162, 235, 0.2)", // Fill color
+                        borderColor:  "rgba(54, 162, 235, 1)", // Line color
+                        backgroundColor: "rgba(46, 87, 73, 0.2)", // Fill color
                         borderWidth: 2,
                         tension: 0.4, // Smooth curve
                         pointRadius: 4,
-                        pointBackgroundColor: "rgba(54, 162, 235, 1)"
+                        pointBackgroundColor:  "rgba(54, 162, 235, 1)"
                     }]
                 },
                 options: {
@@ -1760,15 +1771,15 @@ document.addEventListener("DOMContentLoaded", function () {
                         {
                             label: "Wet Season",
                             data: wetSeasonData, // Yields for Wet Season
-                            backgroundColor: "#1b9e77", // Green for Wet Season
-                            borderColor: "#1b9e77",
+                            backgroundColor: "#183874", // Green for Wet Season
+                            borderColor: "#183874",
                             borderWidth: 1,
                         },
                         {
                             label: "Dry Season",
                             data: drySeasonData, // Yields for Dry Season
-                            backgroundColor: "#d95f02", // Orange for Dry Season
-                            borderColor: "#d95f02",
+                            backgroundColor: "#e47c26", // Orange for Dry Season
+                            borderColor: "#e47c26",
                             borderWidth: 1,
                         },
                     ],

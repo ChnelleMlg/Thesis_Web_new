@@ -6,6 +6,7 @@ from sklearn.preprocessing import MinMaxScaler
 from model.db import store_prediction_result
 
 class ModelLoader:
+    #os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     def __init__(self, merged_data):
         self.merged_data = merged_data

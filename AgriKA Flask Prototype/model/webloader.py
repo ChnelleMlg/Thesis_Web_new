@@ -190,7 +190,8 @@ def create_historical_map(year, season):
                     else:
                         print(f"✅ Found: {municipality_name} -> {yield_dict[municipality_name]}")
 
-                    yield_value = yield_dict.get(municipality_name, "No data")
+                    raw_yield = yield_dict.get(municipality_name, None)
+                    yield_value = "No data" if raw_yield is None or float(raw_yield) == 0 else raw_yield
 
                     tooltip_html = folium.Tooltip(
                         f"""
@@ -205,7 +206,6 @@ def create_historical_map(year, season):
                         """,
                         sticky=True
                     )
-
 
                     geojson_layer = folium.GeoJson(
                         feature,
@@ -249,6 +249,10 @@ def create_historical_map(year, season):
                 var year = yearMatch ? yearMatch[1] : "Unknown Year";
                 var season = seasonMatch ? seasonMatch[1] : "Unknown Season";
                 var yieldValue = yieldMatch ? yieldMatch[1] : "No Data";
+                if (yieldValue === "0" || yieldValue === "0.0") {
+                    yieldValue = "No Data";
+                }
+
 
                 console.log("📌 Sending:", municipality, year, season, yieldValue);
 
@@ -371,6 +375,15 @@ def create_maps_per_municipality():
                         tiles="CartoDB Positron"
                     )
 
+                    tooltip_html = folium.Tooltip(
+                        f"""
+                        <div class="tooltip-municipality" data-municipality="{municipality_name}">
+                            🌾 {municipality_name.title()}
+                        </div>
+                        """,
+                        sticky=True
+)
+
                     # Add filtered municipality boundary with green color
                     geojson_layer = folium.GeoJson(
                         filtered_geojson,
@@ -381,6 +394,9 @@ def create_maps_per_municipality():
                             "weight": 2,
                             "fillOpacity": 0.7,
                         },
+                        tooltip=tooltip_html,
+                        highlight_function=lambda x: {'weight': 3, 'color': 'blue'},
+                        interactive=True
                     )
                     
                     geojson_layer.add_to(m)
