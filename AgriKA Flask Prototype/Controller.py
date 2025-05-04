@@ -15,7 +15,7 @@ app = Flask(__name__)
 scheduler = APScheduler()
 app.secret_key = 'your_secret_key'
 
-@scheduler.task('interval', id='sentinel_get', days=5)
+@scheduler.task('interval', id='sentinel_get', minutes=10)
 def sentinel_get():
 
     print("\n\n\nSENTINEL WORKING\n\n\n")
@@ -24,9 +24,9 @@ def sentinel_get():
     
     # Sentinel acc ni Robby
     config = SHConfig()
-    config.instance_id = '6225b6fd-f1b1-4ca9-bc6f-0669c6addf11'
-    config.sh_client_id = '1f87b8fd-5426-4cc6-b509-a22ac3026f0b'
-    config.sh_client_secret = 'nEyOclApQZvF6WwZMDvNI53OayeD5IRb'
+    config.instance_id = '5912fe92-43ec-4a12-b9b6-70ff43c6bf82'
+    config.sh_client_id = '0faa910e-04eb-4c25-a6f1-e1d1f7a14b04'
+    config.sh_client_secret = 'VmgGWW0JOAvnjRl07knOb5jGsDruADJp'
 
     ndvi_retriever = SentinelImageGet(filepath, config)
 
