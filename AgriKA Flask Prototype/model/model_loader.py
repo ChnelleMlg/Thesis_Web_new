@@ -88,7 +88,11 @@ class ModelLoader:
                             entry["Month"] == month), 0)
 
         
-        final_features = np.append(weather_scaled, green_ratio, phase)
+        #final_features = np.append(weather_scaled, green_ratio, phase)
+        #print(final_features)
+
+        final_features = np.array([green_ratio, phase])
+        final_features = np.concatenate([weather_scaled, final_features])
         print(final_features)
 
         # Combine image features and scaled temperature

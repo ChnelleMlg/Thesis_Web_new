@@ -15,7 +15,7 @@ app = Flask(__name__)
 scheduler = APScheduler()
 app.secret_key = 'your_secret_key'
 
-@scheduler.task('interval', id='sentinel_get', minutes=10)
+@scheduler.task('interval', id='sentinel_get', days=1)
 def sentinel_get():
 
     print("\n\n\nSENTINEL WORKING\n\n\n")
