@@ -83,25 +83,24 @@
                         </select>
                         <!-- Sort Dropdown for Real-Time View -->
                         <select id="sort-dropdown">
-                            <option value="" disabled selected>Sort Here</option>
                             <option value="asc">Low to High</option>
                             <option value="desc">High to Low</option>
                             <option value="default">Default</option>
                         </select>
 
                         <!-- Municipality Search for Real time -->
-                        <div class="dropdown-container" style="display: none;">
-                            <input type="text" style="display: none;" id="municipality-search" placeholder="Select municipality" onfocus="showDropdown()" oninput="filterDropdown()" onkeydown="navigateDropdown(event)" autocomplete="off" >
-                            <span style="display: none;" id="clear-search" onclick="clearSearch()">❌</span>
-                            <div  style="display: none;" id="municipality-dropdown" class="dropdown-content"></div>
+                        <div class="dropdown-container">
+                            <input type="text" id="municipality-search" placeholder="Select municipality" onfocus="showDropdown()" oninput="filterDropdown()" onkeydown="navigateDropdown(event)" autocomplete="off" >
+                            <span id="clear-search" onclick="clearSearch()">❌</span>
+                            <div id="municipality-dropdown" class="dropdown-content"></div>
                         </div>
-
-                        
                     </div>
+
                     <!-- Bar Chart Container for Real-Time Data -->
                     <div id="bar-chart-container">
                         <canvas id="bar-chart"></canvas>
                     </div>
+
                     <!-- Yield Table Container for Real-Time Data (initially hidden) -->
                     <div id="yield-table-container" style="display: none;">
                         <table id="data-table" class="styled-table data-table">
@@ -144,7 +143,6 @@
 
                         <!-- Sort Toggle Dropdown for Historical View -->
                         <select id="sort-dropdown-his">
-                            <option value="" disabled selected>Sort Here</option>
                             <option value="asc">Low to High</option>
                             <option value="desc">High to Low</option>
                             <option value="default">Default</option>

@@ -14,7 +14,7 @@ class ModelLoader:
         self.yield_results = []
 
         # Load Model
-        modelpath = r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\model\model_v2.keras"
+        modelpath = r"C:\Users\ASUS\OneDrive\Documents\GitHub\Thesis_Web_new\AgriKA Flask Prototype\model\model_v2.keras"
         #modelpath = os.path.join(os.getcwd(), "model", "model_v2.keras")
 
         self.model = load_model(modelpath)
@@ -25,6 +25,15 @@ class ModelLoader:
         """Fits the scaler to the temperature data in merged_data."""
 
         merged_df = pd.DataFrame(self.merged_data)
+        print("🔍 DEBUG: Available columns:", merged_df.columns.tolist())
+
+        # ✅ Check if expected columns are missing
+        missing_cols = [col for col in self.weather_features if col not in merged_df.columns]
+        if missing_cols:
+            print(f"❌ ERROR: Missing required weather columns: {missing_cols}")
+            return  
+        
+        ######
         weather_df = merged_df[self.weather_features]
         self.scaler.fit(weather_df)
 
@@ -37,6 +46,7 @@ class ModelLoader:
 
             try:
                 features = self.preprocess_input(city, day, month, weather_data, image_features)
+                print("features: ", features)
                 predicted_yield = self.model.predict(features)[0][0]
                 print("PREDICTED YIELD: ", predicted_yield)
 
@@ -63,7 +73,7 @@ class ModelLoader:
         weather_df = pd.DataFrame([weather_data], columns=self.weather_features)
 
         # Scale the temperature
-        weather_scaled = self.scaler.transform(weather_df).flatten()  # ✅ No mismatch errors!
+        weather_scaled = self.scaler.transform(weather_df).flatten()  
         
         if (month == 3 and day >= 16) or (4 <= month <= 9 and (month != 9 or day <= 15)):
             # Second Cycle
@@ -88,8 +98,13 @@ class ModelLoader:
                             entry["Month"] == month), 0)
 
         
-        final_features = np.append(weather_scaled, green_ratio, phase)
-        print(final_features)
+        print("phase: ", phase)
+        # final_features = np.append(weather_scaled, green_ratio, phase)
+        # final_features = np.append(weather_scaled, [green_ratio, phase])
+        extra_features = np.array([green_ratio, phase])
+        print("Extra Features: ", extra_features)
+        final_features = np.concatenate([weather_scaled, extra_features])
+        print("final features: ", final_features)
 
         # Combine image features and scaled temperature
         X_new = np.hstack([image_features, final_features])

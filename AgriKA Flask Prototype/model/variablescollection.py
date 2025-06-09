@@ -84,6 +84,7 @@ class variableCollector:
 
     def extract_features(self):
         for entry in self.ndvi_images:
+            print(entry)
             img = entry["Image_Array"]
 
             img_resized = cv2.resize(img, (224, 224))
@@ -100,6 +101,7 @@ class variableCollector:
                 "Green_Ratio": green_ratio,
                 "Image_Features": features.flatten()
             })
+        print("Extract Features Print:", self.image_features)
         self.fetch_weather_data()
         self.merge_data()
 

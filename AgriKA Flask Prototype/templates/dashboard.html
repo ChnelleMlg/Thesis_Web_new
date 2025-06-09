@@ -52,6 +52,11 @@
                     <span class="nav-label">DATA ANALYTICS</span> <!-- Added Analytics Nav Update -->
                 </a>
             </li>
+            <li>
+                <a href="{{ url_for('multi_year') }}">
+                    <span class="nav-label">TEST MULTI</span> <!-- Added Analytics Nav Update -->
+                </a>
+            </li>
           </ul>
         </div>
     </nav>
@@ -70,7 +75,15 @@
             <div id="sidebar">
                 <!-- Real-Time Content Section -->
                 <div id="realtime-content">
-                    <div id="toggle-container">
+                    <div id="sticky-container">
+                        <div id="toggle-container">
+                        <!-- Municipality Search for Real time -->
+                        <div class="dropdown-container">
+                            <input type="text" id="municipality-search" placeholder="Select municipality" onfocus="showDropdown()" oninput="filterDropdown()" onkeydown="navigateDropdown(event)" autocomplete="off" >
+                            <span id="clear-search" onclick="clearSearch()">❌</span>
+                            <div id="municipality-dropdown" class="dropdown-content"></div>
+                        </div>  
+                        
                         <!-- Graph Toggle Dropdown for Real-Time View -->
                         <select id="graph-toggle-dropdown">
                             <option value="bar">Bar Graph</option>
@@ -78,21 +91,13 @@
                         </select>
                         <!-- Sort Dropdown for Real-Time View -->
                         <select id="sort-dropdown">
-                            <option value="" disabled selected>Sort Here</option>
+                            <option value="default">Default</option>
                             <option value="asc">Low to High</option>
                             <option value="desc">High to Low</option>
-                            <option value="default">Default</option>
-                        </select>
-
-                        <!-- Municipality Search for Real time -->
-                        <div class="dropdown-container" style="display: none;">
-                            <input type="text" style="display: none;" id="municipality-search" placeholder="Select municipality" onfocus="showDropdown()" oninput="filterDropdown()" onkeydown="navigateDropdown(event)" autocomplete="off" >
-                            <span style="display: none;" id="clear-search" onclick="clearSearch()">❌</span>
-                            <div  style="display: none;" id="municipality-dropdown" class="dropdown-content"></div>
-                        </div>
-
-                        
+                        </select> 
                     </div>
+                    </div>
+                    
                     <!-- Bar Chart Container for Real-Time Data -->
                     <div id="bar-chart-container">
                         <canvas id="bar-chart"></canvas>
@@ -121,66 +126,52 @@
 
                 <!-- Historical Content Section (initially hidden) -->
                 <div id="historical-content" style="display: none;">
-                    <div id="toggle-container-his">
-                        <!-- Municipality Search for Historical -->
-                        <div class="dropdown-container-his">
-                            <input type="text" id="municipality-search-his" placeholder="Select municipality" autocomplete="off" >
-                            <span id="clear-search-his">❌</span>
-                            <div class="dropdown-wrapper">
-                                <div id="municipality-dropdown-his" class="dropdown-list"></div>
-                            </div>
+                    <div id="sticky-container-his">
+                        <div id="toggle-container-his">
+                            <!-- Graph Toggle Dropdown for Historical View -->
+                            <select id="graph-toggle-dropdown-his">
+                                <option value="bar">Bar Graph</option>
+                                <option value="table">Table</option>
+                            </select>
+
+                            <!-- Sort Toggle Dropdown for Historical View -->
+                            <select id="sort-dropdown-his">
+                                <option value="default">Default</option>
+                                <option value="asc">Low to High</option>
+                                <option value="desc">High to Low</option>
+                            </select>
+
+                            <!-- Year Selection Dropdown -->
+                            <select id="year-dropdown-his">
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                                <option value="2019">2019</option>
+                                <option value="2018">2018</option>
+                            </select>
+
+                            <!-- Season Selection Dropdown -->
+                            <select id="season-dropdown-his">
+                                <option value="season1">Wet Season</option> <!-- Updated season names here -Zoe -->
+                                <option value="season2">Dry Season</option>
+                            </select>
                         </div>
+                        <!-- Municipality Search for Historical -->
+                            <div class="dropdown-container-his">
+                                <input type="text" id="municipality-search-his" placeholder="Select municipality" autocomplete="off" >
+                                <span id="clear-search-his">❌</span>
+                                <div class="dropdown-wrapper">
+                                    <div id="municipality-dropdown-his" class="dropdown-list"></div>
+                                </div>
+                            </div>
                     </div>
-                    <div id="toggle-container-his">
-                        <!-- Graph Toggle Dropdown for Historical View -->
-                        <select id="graph-toggle-dropdown-his">
-                            <option value="bar">Bar Graph</option>
-                            <option value="table">Table</option>
-                        </select>
-
-                        <!-- Sort Toggle Dropdown for Historical View -->
-                        <select id="sort-dropdown-his">
-                            <option value="" disabled selected>Sort Here</option>
-                            <option value="asc">Low to High</option>
-                            <option value="desc">High to Low</option>
-                            <option value="default">Default</option>
-                        </select>
-
-                        <!-- Year Selection Dropdown -->
-                        <select id="year-dropdown-his">
-                            <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                            <option value="2022">2022</option>
-                            <option value="2021">2021</option>
-                            <option value="2020">2020</option>
-                            <option value="2019">2019</option>
-                            <option value="2018">2018</option>
-                        </select>
-
-                        <!-- Season Selection Dropdown -->
-                        <select id="season-dropdown-his">
-                            <option value="season1">Wet Season</option> <!-- Updated season names here -Zoe -->
-                            <option value="season2">Dry Season</option>
-                        </select>
-                    </div>
-                    
+                        
                     <!-- Bar Chart Container for Historical Data -->
                     <div id="historical-bar-chart-container">
                         <canvas id="historical-bar-chart"></canvas>
                     </div>
-
-                    <!--
-                    <div id="line-chart-container" style="display: none;">
-                        <canvas id="laguna-average-yield-line-chart"></canvas>
-                    </div>
-                    
-
-                    <div id="municipality-seasons-bar-chart-container" style="display: none;">
-                        <canvas id="municipality-seasons-bar-chart"></canvas>
-                    </div>
-                    -->
-                    
-                    <!-- update ni chan -->
                     <!-- Yield Table Container for Historical Data (initially hidden) -->
                     <div id="yield-table-container-his" style="display: none;">
                        <div class="table-header-wrap">
@@ -828,7 +819,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         let isFiltered = municipalities.length < originalYieldData.length; 
-        let chartTitle = "Real Time Yield Data";
+        let chartTitle = "Real Time Rice Yield Data";
 
         // If no selection is made, show all data
         //if (!isFiltered || municipalities.length === 0) {
