@@ -5,6 +5,7 @@ import json
 import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
+from shapely.geometry import shape
 
 municipality_coords = {
     "alaminos": {"lat": 14.0616, "lng": 121.2604, "zoom": 12},
@@ -64,9 +65,6 @@ def get_color_realtime(yield_value):
         return "#1b499f"
 
 def create_map():
-    """
-    Generates a Folium map with municipalities colored based on yield values.
-    """
     m = folium.Map(
         location=[14.16667, 121.33333],
         zoom_start=10,
@@ -78,6 +76,11 @@ def create_map():
 
     municipalities, yields, yield_data = get_realtime_yield_data()
     yield_dict = {m.lower(): v for m, v in yield_data.items()}
+
+    # Identify the municipality with max and min valid (non-zero) yield
+    valid_yields = {mun: y for mun, y in yield_dict.items() if isinstance(y, (int, float)) and y > 0}
+    max_mun = max(valid_yields, key=valid_yields.get) if valid_yields else None
+    min_mun = min(valid_yields, key=valid_yields.get) if valid_yields else None
 
     for file in geojson_files:
         if os.path.exists(file):
@@ -91,12 +94,6 @@ def create_map():
 
                 for feature in geojson_data["features"]:
                     municipality_name = feature["properties"].get("name", "Unknown Municipality").strip().lower()
-
-                    if municipality_name not in yield_dict:
-                        print(f"❌ No yield data for: {municipality_name}")
-                    else:
-                        print(f"✅ Found: {municipality_name} -> {yield_dict[municipality_name]}")
-
                     yield_value = yield_dict.get(municipality_name, "No data")
 
                     tooltip_html = folium.Tooltip(
@@ -111,6 +108,7 @@ def create_map():
                         sticky=True
                     )
 
+                    # Add GeoJson layer
                     folium.GeoJson(
                         feature,
                         name=municipality_name,
@@ -123,37 +121,46 @@ def create_map():
                         tooltip=tooltip_html
                     ).add_to(m)
 
-    # --- Embed a JavaScript Function to Highlight a Municipality ---
-    # Note: Folium creates a map variable with a generated name.
-    # You can get that name from m.get_name(). For example:
-    map_var = m.get_name()  # This returns a string like "map_a8f68228628dd4abeda66c8b1b11129b"
+                    if municipality_name == max_mun:
+                        emoji = "⭐"
+                        geom = shape(feature["geometry"])
+                        centroid = geom.centroid
+
+                        folium.Marker(
+                            location=[centroid.y, centroid.x],
+                            icon=folium.DivIcon(html=f"""
+                                <div style="font-size: 20px; text-align: center;">{emoji}</div>
+                            """)
+                        ).add_to(m)
+
+    # JS for highlight functionality
+    map_var = m.get_name()
     highlight_script = f"""
-                        <script>
-                        function highlightMunicipality(selected) {{
-                        for (var i in {map_var}._layers) {{
-                            var layer = {map_var}._layers[i];
-                            if (layer.feature && layer.feature.properties && layer.feature.properties.name) {{
-                                var munName = layer.feature.properties.name.trim().toLowerCase();
-                                if (munName === selected.trim().toLowerCase()) {{
-                                    layer.setStyle({{fillOpacity: 0.9, color: 'red', weight: 3}});
-                                    if (layer.bringToFront) {{
-                                        layer.bringToFront();
-                                    }}
-                                }} else {{
-                                    layer.setStyle({{fillOpacity: 0.7, color: 'black', weight: 2}});
-                                }}
-                            }}
+        <script>
+        function highlightMunicipality(selected) {{
+            for (var i in {map_var}._layers) {{
+                var layer = {map_var}._layers[i];
+                if (layer.feature && layer.feature.properties && layer.feature.properties.name) {{
+                    var munName = layer.feature.properties.name.trim().toLowerCase();
+                    if (munName === selected.trim().toLowerCase()) {{
+                        layer.setStyle({{fillOpacity: 0.9, color: 'red', weight: 3}});
+                        if (layer.bringToFront) {{
+                            layer.bringToFront();
                         }}
-                        }}
-                        </script>
-                        """
+                    }} else {{
+                        layer.setStyle({{fillOpacity: 0.7, color: 'black', weight: 2}});
+                    }}
+                }}
+            }}
+        }}
+        </script>
+    """
     m.get_root().html.add_child(folium.Element(highlight_script))
-    # --- End Embed Script ---
 
     if not os.path.exists("static"):
         os.makedirs("static")
-    m.fit_bounds([[13.8, 121.0], [14.6, 121.6]])
-    m.save("static/map.html")
+    m.fit_bounds([[13.4, 121.0], [14.4, 121.6]])
+    m.save("static/realtime_map.html")
 
 def create_historical_map(year, season):
     """
@@ -310,7 +317,7 @@ def create_historical_map(year, season):
 
     if not os.path.exists("static"):
         os.makedirs("static")
-    m.fit_bounds([[13.3, 121.0], [14.3, 121.6]])
+    m.fit_bounds([[13.4, 121.0], [14.4, 121.6]])
     m.save("static/historical_map.html")
 
 def create_all_historical_maps():

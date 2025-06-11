@@ -171,3 +171,41 @@ def get_realtime_yield_data():
     finally:
         cursor.close()
         conn.close()
+
+def get_multi_year(season=None, municipalities=None):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    query = """
+        SELECT rf.municipality, rf.year, rf.season, h.yield
+        FROM historical h
+        JOIN rice_field rf ON h.ID_rice = rf.ID_rice
+        WHERE 1=1
+    """
+    params = []
+
+    if season is not None:
+        query += " AND rf.season = %s"
+        params.append(season)
+
+    if municipalities:
+        placeholders = ','.join(['%s'] * len(municipalities))
+        query += f" AND rf.municipality IN ({placeholders})"
+        params.extend(municipalities)
+
+    query += " ORDER BY rf.municipality, rf.year"
+
+    cursor.execute(query, params)
+    data = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return data
+
+def get_all_municipalities():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT municipality FROM rice_field ORDER BY municipality")
+    municipalities = [row[0] for row in cursor.fetchall()]
+    cursor.close()
+    conn.close()
+    return municipalities

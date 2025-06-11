@@ -1,0 +1,379 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Multi-Year Yield Comparison</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriKA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='multi_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Josefin Sans'>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href='https://fonts.googleapis.com/css?family=Source Sans Pro' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css" />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" />
+    <!-- Font Awesome or other libraries -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css" />
+    <!-- jQuery(-->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-container">
+          <!-- Logo Section -->
+          <div class="nav-logo">
+            <a href="{{ url_for('home') }}">
+              <img src="{{ url_for('static', filename='images/AgriKA.png') }}" alt="Logo">
+            </a>
+          </div>
+          <!-- Navigation Links -->
+          <ul class="nav-links">
+            <li>
+              <a href="{{ url_for('home') }}">
+                <span class="nav-label">HOME</span>
+              </a>
+            </li>
+            <li>
+                <a href="{{ url_for('dashboard') }}">
+                    <span class="nav-label">DATA ANALYTICS</span> <!-- Added Analytics Nav Update -->
+                </a>
+            </li>
+          </ul>
+        </div>
+    </nav>
+    
+  <section class="multi-year-chart-section">
+    <!-- <h2>Rice Yield Multi-Year Comparison</h2> -->
+
+    <div class="multi-year-flex-container">
+      <form id="filterForm" method="GET" action="/multi_year" class="filter-form">
+
+        <!-- Season Dropdown -->
+        <div class="form-group season-group">
+          <label for="season"><strong>Select Season:</strong></label>
+          <select id="season" name="season">
+            <option value="" {{ '' == selected_season and 'selected' or '' }}>All Seasons</option>
+            <option value="1" {{ '1' == selected_season and 'selected' or '' }}>Dry Season (1)</option>
+            <option value="2" {{ '2' == selected_season and 'selected' or '' }}>Wet Season (2)</option>
+          </select>
+        </div>
+
+        <!-- Municipality Dropdown -->
+        <div class="form-group municipality-group">
+          <label for="municipality"><strong>Select Municipalities:</strong></label>
+          <select id="municipality" name="municipality" multiple>
+            {% for muni in municipalities %}
+              <option value="{{ muni }}" {% if muni in selected_municipalities %}selected{% endif %}>{{ muni }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Apply & Clear -->
+        <div class="form-actions">
+          <button type="submit">Apply Filters</button>
+          <button type="button" id="clearButton">Clear</button>
+        </div>
+
+        <!-- Chart Control Buttons -->
+        <div class="chart-control-wrapper">
+          <label for="chart"><strong>Chart Controls:</strong></label>
+          <div class="chart-control-buttons">
+            <button type="button" id="resetZoomBtn">Reset Zoom</button>
+            <button id="resetIsolationBtn">Reset Isolation</button>
+            <button id="togglePan" type="button">Toggle Pan: On</button>
+            <button id="toggleZoom" type="button">Toggle Zoom: On</button>
+          </div>
+        </div>
+
+
+      </form>
+
+      <!-- Chart Section -->
+      <div class="chart-container">
+        <canvas id="yieldChart"></canvas>
+      </div>
+    </div>
+</section>
+
+
+
+    <!-- MULTI YEAR LINE CHART -->
+    
+    <!-- Footer Section -->
+    <footer>
+        <div class="footer-section">
+        <div class="footer-column">
+            <h4>Connect with Us</h4>
+            <p>
+            <span>AgriKA</span><br>
+            <i class="fas fa-phone"></i> +65 912 123 1234<br>
+            <i class="fas fa-envelope"></i> agrika@gmail.com
+            </p>
+        </div>
+        <div class="footer-column">
+            <h4>Collaborators</h4>
+            <div class="collaborator">
+            <img src="{{ url_for('static', filename='images/Prism.png') }}" alt="PhilRice" class="small-logo">
+            <span class="tooltip">PRiSM</span>
+            </div>
+        </div>
+        </div>
+        <hr>
+        <p class="footer-copy">Copyright © 2025 All Rights Reserved by AgriKA</p>
+    </footer>
+  
+</body>
+<script>
+  // Register Chart.js plugins
+  Chart.register(window['chartjs-plugin-annotation']);
+
+  let isolatedDatasetIndex = null;
+
+  // Initialize Choices.js
+  const municipalitySelect = new Choices('#municipality', {
+    removeItemButton: true,
+    placeholder: true,
+    placeholderValue: 'Select municipalities',
+    searchPlaceholderValue: 'Search municipalities'
+  });
+
+  // Clear filters
+  document.getElementById('clearButton').addEventListener('click', () => {
+    document.getElementById('season').value = '';
+    municipalitySelect.removeActiveItems();
+    document.getElementById('filterForm').submit();
+  });
+
+  // Chart setup
+  const originalLabels = {{ years | map('string') | list | tojson }};
+  const originalDatasets = {{ chart_datasets | tojson }};
+  const ctx = document.getElementById('yieldChart').getContext('2d');
+
+  const yieldChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: originalLabels,
+      datasets: JSON.parse(JSON.stringify(originalDatasets))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: true
+      },
+      onClick: (e) => {
+        const points = yieldChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+        if (!points.length) return;
+
+        const clickedPoint = points[0];
+        const clickedDataset = yieldChart.data.datasets[clickedPoint.datasetIndex];
+        const clickedLabel = clickedDataset.label || "";
+        const clickedMunicipality = clickedLabel.split(" - ")[0]; // <-- Correct splitting here
+
+        const seasonSelected = document.getElementById("season").value;
+        const isSameAsPrevious = isolatedDatasetIndex === clickedPoint.datasetIndex;
+
+        // Reset all datasets
+        yieldChart.data.datasets.forEach((ds) => {
+          ds.borderColor = ds._originalBorderColor || ds.borderColor;
+          ds.backgroundColor = ds._originalBackgroundColor || ds.backgroundColor;
+          ds.borderWidth = 2;
+          ds._isIsolated = false;
+
+          delete ds.pointRadius;
+          delete ds.pointHoverRadius;
+          delete ds.pointBackgroundColor;
+          delete ds.pointBorderColor;
+        });
+
+        if (!isSameAsPrevious) {
+          yieldChart.data.datasets.forEach((ds, i) => {
+            const dsLabel = ds.label || "";
+            const dsMunicipality = dsLabel.split(" - ")[0]; // <-- Correct splitting here
+
+            const highlightThis =
+              (seasonSelected === "" && dsMunicipality === clickedMunicipality) || // highlight both seasons
+              (seasonSelected !== "" && ds.label === clickedLabel);                // only one season
+
+            if (highlightThis) {
+              ds._originalBorderColor = ds.borderColor;
+              ds._originalBackgroundColor = ds.backgroundColor;
+              ds.borderWidth = 2;
+              ds._isIsolated = true;
+
+              ds.pointRadius = 6;
+              ds.pointHoverRadius = 8;
+              ds.pointBackgroundColor = ds.borderColor;
+              ds.pointBorderColor = '#fff';
+            } else {
+              ds._originalBorderColor = ds.borderColor;
+              ds._originalBackgroundColor = ds.backgroundColor;
+              ds.borderColor = 'rgba(200, 200, 200, 0.4)';
+              ds.backgroundColor = 'rgba(200, 200, 200, 0.2)';
+              ds.borderWidth = 1;
+
+              ds.pointRadius = 2;
+              ds.pointHoverRadius = 2;
+              ds.pointBackgroundColor = 'rgba(200,200,200,0.2)';
+              ds.pointBorderColor = 'rgba(200,200,200,0.2)';
+            }
+          });
+
+          isolatedDatasetIndex = clickedPoint.datasetIndex;
+        } else {
+          isolatedDatasetIndex = null;
+        }
+
+        yieldChart.update();
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            usePointStyle: true,
+            boxWidth: 10,
+            font: { size: 12 }
+          }
+        },
+        tooltip: {
+          mode: 'nearest',
+          intersect: true,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          titleFont: { size: 14, weight: 'bold' },
+          bodyFont: { size: 12 },
+          padding: 10,
+          cornerRadius: 6,
+          displayColors: true,
+          callbacks: {
+            label: function (context) {
+              return `${context.dataset.label}: ${context.formattedValue} tons/ha`;
+            }
+          }
+        },
+        title: {
+          display: true,
+          text: 'Rice Yield per Municipality Over the Years',
+          font: { size: 22, weight: 'bold' }
+        },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'xy'
+          },
+          zoom: {
+            wheel: { enabled: true },
+            pinch: { enabled: true },
+            mode: 'xy'
+          }
+        }
+      },
+      elements: {
+        point: {
+          radius: 4,
+          hoverRadius: 8,
+          backgroundColor: function (context) {
+            const value = context.dataset.data[context.dataIndex];
+            return value > 5 ? 'rgba(0, 123, 255, 1)' : 'rgba(255, 193, 7, 1)';
+          },
+          borderColor: '#fff',
+          borderWidth: 2,
+          hoverBackgroundColor: function (context) {
+            return context.dataset.borderColor || context.dataset.backgroundColor || 'rgba(0,0,0,1)';
+          },
+          hoverBorderColor: '#000',
+          hoverBorderWidth: 3,
+          hitRadius: 10
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Rice Yield (tons/ha)',
+            font: { weight: 'bold' }
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Year',
+            font: { weight: 'bold' }
+          }
+        }
+      }
+    }
+  });
+
+
+  // Reset zoom
+  document.getElementById('resetZoomBtn').addEventListener('click', () => {
+    yieldChart.resetZoom();
+  });
+
+  // Reset Isolation
+  document.getElementById('resetIsolationBtn').addEventListener('click', () => {
+    yieldChart.data.datasets.forEach((ds) => {
+      ds.borderColor = ds._originalBorderColor || ds.borderColor;
+      ds.backgroundColor = ds._originalBackgroundColor || ds.backgroundColor;
+      ds.borderWidth = 2;
+      ds.hidden = false;
+      ds._isIsolated = false;
+    });
+    yieldChart.update();
+  });
+
+  // Toggle zoom and pan
+  let isPanEnabled = true;
+  let isZoomEnabled = true;
+
+  document.getElementById('togglePan').addEventListener('click', (e) => {
+    e.preventDefault();
+    isPanEnabled = !isPanEnabled;
+    yieldChart.options.plugins.zoom.pan.enabled = isPanEnabled;
+    yieldChart.update();
+    e.target.textContent = `Toggle Pan: ${isPanEnabled ? 'On' : 'Off'}`;
+  });
+
+  document.getElementById('toggleZoom').addEventListener('click', (e) => {
+    e.preventDefault();
+    isZoomEnabled = !isZoomEnabled;
+    yieldChart.options.plugins.zoom.zoom.wheel.enabled = isZoomEnabled;
+    yieldChart.options.plugins.zoom.zoom.pinch.enabled = isZoomEnabled;
+    yieldChart.options.plugins.zoom.zoom.drag = isZoomEnabled ? {
+      enabled: false,
+      borderColor: 'rgb(54, 162, 235)',
+      borderWidth: 1,
+      backgroundColor: 'rgba(54, 162, 235, 0.3)'
+    } : false;
+    if (!isZoomEnabled) {
+      yieldChart.resetZoom();
+    }
+    yieldChart.update();
+    e.target.textContent = `Toggle Zoom: ${isZoomEnabled ? 'On' : 'Off'}`;
+  });
+</script>
+
+</html>

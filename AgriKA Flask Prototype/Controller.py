@@ -7,6 +7,8 @@ from model.sentinelcollection import *
 from model.variablescollection import *
 from model.model_loader import *
 from model.db import *
+from collections import defaultdict
+import random 
 #from services.yield_analytics import *
 
 sys.path.insert(0, r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype")
@@ -14,6 +16,7 @@ sys.path.insert(0, r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\Agr
 app = Flask(__name__)
 scheduler = APScheduler()
 app.secret_key = 'your_secret_key'
+
 
 @scheduler.task('interval', id='sentinel_get', days=1)
 def sentinel_get():
@@ -126,6 +129,91 @@ def dashboard():
         #seasonal_data=seasonal_data,
     )
 
+def get_color_for_muni(muni):
+        random.seed(muni)  
+        r = random.randint(50, 200)
+        g = random.randint(50, 200)
+        b = random.randint(50, 200)
+        solid = f'rgba({r}, {g}, {b}, 1)'
+        faded = f'rgba({r}, {g}, {b}, 0.5)'  
+        return solid, faded
+
+@app.route("/multi_year")
+def multi_year():
+    season = request.args.get("season")
+    municipalities = request.args.getlist("municipality")
+
+    # Convert season to int or None
+    try:
+        season = int(season) if season else None
+    except ValueError:
+        season = None
+
+    all_munis = get_all_municipalities()
+
+    if not municipalities:
+        municipalities = all_munis[:5]
+
+    # Always fetch all season data to allow conditional processing
+    historical_data = get_multi_year(season=None, municipalities=municipalities)
+
+    # chart_data[municipality][season][year] = yield
+    chart_data = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+    years_set = set()
+
+    for row in historical_data:
+        municipality = row['municipality']
+        year = row['year']
+        season_val = row['season']
+        yield_value = row['yield']
+
+        chart_data[municipality][season_val][year] += yield_value
+        years_set.add(year)
+
+    sorted_years = sorted(years_set)
+    formatted_chart_data = []
+
+    for municipality, seasons in chart_data.items():
+        color_solid, color_faded = get_color_for_muni(municipality)
+
+        if season:  # Single season selected
+            year_data = seasons.get(season, {})
+            dataset = {
+                'label': f"{municipality} - Season {season}",
+                'data': [year_data.get(year, 0) for year in sorted_years],
+                'fill': False,
+                'borderColor': color_solid if season == 1 else color_faded,
+                'backgroundColor': color_solid if season == 1 else color_faded,  
+                'borderDash': [] if season == 1 else [5, 5],
+                'tension': 0,
+                'borderWidth': 2
+            }
+            formatted_chart_data.append(dataset)
+
+        else:  # All seasons
+            for season_val in [1, 2]:
+                year_data = seasons.get(season_val, {})
+                dataset = {
+                    'label': f"{municipality} - Season {season_val}",
+                    'data': [year_data.get(year, 0) for year in sorted_years],
+                    'fill': False,
+                    'borderColor': color_solid if season_val == 1 else color_faded,
+                    'backgroundColor': color_solid if season_val == 1 else color_faded,  # <- Add this
+                    'borderDash': [] if season_val == 1 else [5, 5],
+                    'tension': 0,
+                    'borderWidth': 2
+                }
+                formatted_chart_data.append(dataset)
+
+    return render_template(
+        "multi_year.html",
+        years=sorted_years,
+        chart_datasets=formatted_chart_data,
+        selected_season=str(season) if season else '',
+        municipalities=all_munis,
+        selected_municipalities=municipalities
+    )
+
 @app.route('/view')
 def view():
 
@@ -161,6 +249,8 @@ def view():
         historical_yield_data=historical_yield_data,
         municipality_clicked=municipality_clicked,  # Add clicked data to template
     )
+
+
 
 if __name__ == '__main__':
     scheduler.init_app(app)
