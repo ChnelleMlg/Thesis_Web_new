@@ -79,11 +79,20 @@ class SentinelImageGet:
             return None
 
     def apply_image_filters(self, image):
-        """Enhance the image by applying brightness and sharpening filters."""
+        truecolor_image = image
+
         brightness_filter = np.array([[0, 0, 0], [0, 4, 0], [0, 0, 0]])
+        truecolor_image = cv2.filter2D(truecolor_image, -1, brightness_filter)
+
         sharpness_filter = np.array([[0, -1, 0], [-1, 5.2, -1], [0, -1, 0]])
-        image = cv2.filter2D(image, -1, brightness_filter)
-        return cv2.filter2D(image, -1, sharpness_filter)
+        truecolor_image = cv2.filter2D(truecolor_image, -1, sharpness_filter)
+
+        brightness_factor = 1.5
+        truecolor_image_float = truecolor_image.astype(np.float32) * brightness_factor
+        truecolor_image_float = np.clip(truecolor_image_float, 0, 255)
+        truecolor_bright = truecolor_image_float.astype(np.uint8)
+
+        return truecolor_bright
 
     def compute_black_pixel_ratio(self, image):
         black_threshold = 30

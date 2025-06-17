@@ -53,34 +53,45 @@ class variableCollector:
             }
 
     def extract_green_area(self, image):
-        img = cv2.resize(image, (224, 224))
-        non_black_mask = np.any(img != [0, 0, 0], axis=-1)
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        # Remove black background pixels
+        non_black_mask = np.any(image != [0, 0, 0], axis=-1)
 
-        lower_green, upper_green = np.array([0, 60, 0]), np.array([176, 204, 100])
+        # Check if image is already RGB (skip conversion if so)
+        if image.shape[-1] == 3:
+            img_rgb = image
+        else:
+            img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        lower_green = np.array([0, 60, 0])
+        upper_green = np.array([190, 210, 100])
+
+        # Create mask for green areas
         green_mask = cv2.inRange(img_rgb, lower_green, upper_green)
 
-        refined_mask = cv2.bitwise_and(green_mask, green_mask)
-        valid_pixels = np.sum(non_black_mask)
-
-        ''' BALIKAN
-        # Dark green exclusion
-        lower_dgreen = np.array([0, 40, 0])
-        upper_dgreen = np.array([10, 80, 10])
+        lower_dgreen = np.array([0, 60, 0])
+        upper_dgreen = np.array([5, 75, 5])
         dgreen_mask = cv2.inRange(img_rgb, lower_dgreen, upper_dgreen)
 
-        # Exclude pink (soil/stressed crops)
-        lower_pink = np.array([200, 0, 100])
-        upper_pink = np.array([255, 150, 200])
+        lower_pink = np.array([248, 153, 151])
+        upper_pink = np.array([237, 13, 182])
         pink_mask = cv2.inRange(img_rgb, lower_pink, upper_pink)
 
-        # Exclude yellow (dry areas)
-        lower_yellow = np.array([200, 150, 0])
-        upper_yellow = np.array([255, 255, 100])
+        lower_yellow = np.array([251, 207, 159])
+        upper_yellow = np.array([254, 255, 255])
         yellow_mask = cv2.inRange(img_rgb, lower_yellow, upper_yellow)
-        '''
-    
-        return np.sum(refined_mask == 255) / valid_pixels if valid_pixels else 0
+
+        exclusion_mask = cv2.bitwise_or(dgreen_mask, pink_mask)
+        exclusion_mask = cv2.bitwise_or(exclusion_mask, yellow_mask)
+        refined_mask = cv2.bitwise_and(green_mask, cv2.bitwise_not(exclusion_mask))
+
+        valid_pixels = np.sum(non_black_mask)
+        if valid_pixels == 0:
+            return 0.0  # Avoid division by zero
+
+        green_ratio = np.sum(refined_mask == 255) / valid_pixels
+        print(f"Green Ratio: {green_ratio:.2%}")
+
+        return green_ratio
 
     def extract_features(self):
         for entry in self.ndvi_images:
@@ -155,8 +166,6 @@ class variableCollector:
                 self.merged_data.append({
                     'City/Municipality': city,
                     'Temperature (Celsius)': round(weather['temperature'], 2),
-                    'Rainfall (mm)': round(weather['rainfall'], 2),
-                    'Humidity (%)': round(weather['humidity'], 2),
                     'Day': date_obj.timetuple().tm_yday,
                     'Month': date_obj.month,
                     'Green_Ratio': img_data['Green_Ratio'],

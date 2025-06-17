@@ -25,11 +25,10 @@ def sentinel_get():
     filepath = r"C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\static\fields_coordinates.geojson"
     #filepath = os.path.join(os.getcwd(), "static", "fields_coordinates.geojson")
     
-    # Sentinel acc ni Robby
     config = SHConfig()
-    config.instance_id = '5912fe92-43ec-4a12-b9b6-70ff43c6bf82'
-    config.sh_client_id = '0faa910e-04eb-4c25-a6f1-e1d1f7a14b04'
-    config.sh_client_secret = 'VmgGWW0JOAvnjRl07knOb5jGsDruADJp'
+    config.instance_id = '3c53ec36-1487-47cc-9f00-3e11e6fc0d61'
+    config.sh_client_id = '5c235e97-84f1-4556-9a72-555fc45031be'
+    config.sh_client_secret = 'qeqD4XKYyCBGW1qaOZr8VLkOsJ73FK2x'
 
     ndvi_retriever = SentinelImageGet(filepath, config)
 
@@ -52,6 +51,7 @@ def sentinel_get():
 
     # Fit the scaler once on the merged dataset
     cnn_model_instance.fit_scaler()
+
 
 #changes ni perl
 @app.route('/handle_click', methods=['POST'])
@@ -107,6 +107,13 @@ def dashboard():
         print("❌ Error in get_realtime_yield_data:", e)
         municipalities, yields, yield_data = [], [], {}
     
+    try:
+        latest_realtime_date = get_latest_realtime_date() 
+    except Exception as e:
+        print("❌ Error in get_realtime_yield_data:", e)
+        latest_realtime_date = None
+
+    
     historical_yield_data = get_historical_data()
     municipality_clicked = session.get('municipality_clicked', 'Not clicked')  # Default to 'Not clicked' if not found
 
@@ -123,10 +130,11 @@ def dashboard():
 
         # Pass the historical yield data to the template
         historical_yield_data=historical_yield_data,
-        municipality_clicked=municipality_clicked
+        municipality_clicked=municipality_clicked,
         #yearly_trends=yearly_trends,
         #municipality_averages=municipality_averages,
         #seasonal_data=seasonal_data,
+        latest_realtime_date = latest_realtime_date
     )
 
 def get_color_for_muni(muni):

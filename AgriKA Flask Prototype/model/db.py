@@ -209,3 +209,21 @@ def get_all_municipalities():
     cursor.close()
     conn.close()
     return municipalities
+
+def get_latest_realtime_date():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)  # Adjust if needed
+    
+    query = """
+        SELECT rt.date
+        FROM real_time rt
+        ORDER BY rt.date DESC
+        LIMIT 1
+    """
+    
+    cursor.execute(query)
+    data = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return data
+

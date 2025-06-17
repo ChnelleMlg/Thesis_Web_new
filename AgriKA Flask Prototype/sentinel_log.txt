@@ -1,0 +1,74 @@
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Added job "scheduled_task" to job store "default"
+INFO:apscheduler.scheduler:Scheduler started
+INFO:apscheduler.executors.default:Running job "scheduled_task (trigger: interval[0:10:00], next run at: 2025-06-17 18:59:27 +08)" (scheduled at 2025-06-17 18:59:27.441540+08:00)
+INFO:root:2025-06-17 18:59:27.444980 - Running sentinel_get...
+ERROR:apscheduler.executors.default:Job "scheduled_task (trigger: interval[0:10:00], next run at: 2025-06-17 19:09:27 +08)" raised an exception
+Traceback (most recent call last):
+  File "C:\Users\perli\AppData\Local\Programs\Python\Python311\Lib\site-packages\sentinelhub\download\handlers.py", line 40, in new_download_func
+    return download_func(self, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\perli\AppData\Local\Programs\Python\Python311\Lib\site-packages\sentinelhub\download\sentinelhub_client.py", line 100, in _execute_download
+    response.raise_for_status()
+  File "C:\Users\perli\AppData\Roaming\Python\Python311\site-packages\requests\models.py", line 1021, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://services.sentinel-hub.com/api/v1/catalog/1.0.0/search
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\perli\AppData\Local\Programs\Python\Python311\Lib\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\scheduler_runner.py", line 14, in scheduled_task
+    sentinel_get()
+  File "C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\Controller.py", line 39, in sentinel_get
+    ndvi_retriever.get_DateOfImage(city, polygons)
+  File "C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\model\sentinelcollection.py", line 154, in get_DateOfImage
+    latest_date = self.get_latest_sentinel_date(aoi_geometry)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\perli\Desktop\AgriKA Web\AgriKA\Thesis_Web_new\AgriKA Flask Prototype\model\sentinelcollection.py", line 68, in get_latest_sentinel_date
+    results = list(search_iterator)
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\perli\AppData\Local\Programs\Python\Python311\Lib\site-packages\sentinelhub\base.py", line 277, in __next__
+    new_features = self._fetch_features()
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\perli\AppData\Local\Programs\Python\Python311\Lib\site-packages\sentinelhub\api\catalog.py", line 245, in _fetch_features
+    results = self.client.get_json_dict(self.url, post_values=payload, use_session=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\perli\AppData\Local\Programs\Python\Python311\Lib\site-packages\sentinelhub\download\client.py", line 248, in get_json_dict
+    response = self.get_json(url, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\perli\AppData\Local\Programs\Python\Python311\Lib\site-packages\sentinelhub\download\client.py", line 238, in get_json
+    return self._single_download_decoded(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\perli\AppData\Local\Programs\Python\Python311\Lib\site-packages\sentinelhub\download\client.py", line 116, in _single_download_decoded
+    response = self._single_download(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\perli\AppData\Local\Programs\Python\Python311\Lib\site-packages\sentinelhub\download\client.py", line 129, in _single_download
+    response = self._execute_download(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\perli\AppData\Local\Programs\Python\Python311\Lib\site-packages\sentinelhub\download\handlers.py", line 67, in new_download_func
+    return download_func(self, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\perli\AppData\Local\Programs\Python\Python311\Lib\site-packages\sentinelhub\download\handlers.py", line 46, in new_download_func
+    raise DownloadFailedException(
+sentinelhub.exceptions.DownloadFailedException: Failed to download from:
+https://services.sentinel-hub.com/api/v1/catalog/1.0.0/search
+with HTTPError:
+403 Client Error: Forbidden for url: https://services.sentinel-hub.com/api/v1/catalog/1.0.0/search
+Server response: "{"code": 403, "description": "Invalid or expired account."}"
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Added job "scheduled_task" to job store "default"
+INFO:apscheduler.scheduler:Scheduler started
+INFO:apscheduler.executors.default:Running job "scheduled_task (trigger: interval[0:10:00], next run at: 2025-06-17 19:14:00 +08)" (scheduled at 2025-06-17 19:14:00.816666+08:00)
+INFO:root:2025-06-17 19:14:00.819238 - Running sentinel_get...
+WARNING:apscheduler.scheduler:Execution of job "scheduled_task (trigger: interval[0:10:00], next run at: 2025-06-17 19:24:00 +08)" skipped: maximum number of running instances reached (1)
+INFO:apscheduler.executors.default:Job "scheduled_task (trigger: interval[0:10:00], next run at: 2025-06-17 19:34:00 +08)" executed successfully
+INFO:apscheduler.executors.default:Running job "scheduled_task (trigger: interval[0:10:00], next run at: 2025-06-17 19:44:00 +08)" (scheduled at 2025-06-17 19:34:00.816666+08:00)
+INFO:root:2025-06-17 19:34:00.828677 - Running sentinel_get...
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Added job "scheduled_task" to job store "default"
+INFO:apscheduler.scheduler:Scheduler started
+INFO:apscheduler.executors.default:Running job "scheduled_task (trigger: interval[0:10:00], next run at: 2025-06-17 20:42:53 +08)" (scheduled at 2025-06-17 20:42:53.692725+08:00)
+INFO:root:2025-06-17 20:42:53.708523 - Running sentinel_get...

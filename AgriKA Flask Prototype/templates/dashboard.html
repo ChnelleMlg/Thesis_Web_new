@@ -198,15 +198,19 @@
         <!-- Main Content Area -->
         <div id="content-container">
             <!-- Legend -->
-            <div id="bottom-container">
+            <div id="bottom-container" class="bottom-container" >
+            <div class="legend-item">
+                <span>Average Rice Yield (tons/hectare):</span>
+            </div>
+            <div id="legend-container">
                 <div class="legend-item">
-                    <span>Average Yield (tons/hectare):</span>
-                </div>
-                <div id="legend-container">
-                    <div class="legend-item">
-                    </div>
                 </div>
             </div>
+            <span class="tooltip">
+                The map's color scheme displays the average agricultural yield in <br> 
+                tons per hectare for each municipality. Red signifies a low yield, <br>
+                yellow a moderate yield, green a good yield, and blue an excellent yield. </span>
+        </div>
             
             <!-- Map Section --> 
             <div id="map-container">
@@ -283,18 +287,22 @@
                 <div id="kpi-1" class="kpi-card">
                     <span id="kpi-1-label">Predicted Avg Rice Yield:</span>
                     <strong id="kpi-1-value">4.5 t/ha</strong>
+                    <span id=kpi-1-tooltip class="tooltip-kpi-left">The map's </span>
                 </div>
                 <div id="kpi-2" class="kpi-card">
                     <span id="kpi-2-label">Predicted Avg Rice Yield:</span>
                     <strong id="kpi-2-value">4.5 t/ha</strong>
+                    <span id=kpi-2-tooltip class="tooltip-kpi-right">The map's </span>
                 </div>
                 <div id="kpi-3" class="kpi-card">
                     <span id="kpi-3-label">Predicted Avg Rice Yield:</span>
                     <strong id="kpi-3-value">4.5 t/ha</strong>
+                    <span id=kpi-3-tooltip class="tooltip-kpi-left">The map's </span>
                 </div>
                 <div id="kpi-4" class="kpi-card">
                     <span id="kpi-4-label">Predicted Avg Rice Yield:</span>
                     <strong id="kpi-4-value">4.5 t/ha</strong>
+                    <span id=kpi-4-tooltip class="tooltip-kpi-right">The map's </span>
                 </div>
             </div>
             <!-- ACTUAL VS PREDICTED CHART Section --> 
@@ -344,7 +352,7 @@
             <h4>Collaborators</h4>
             <div class="collaborator">
             <img src="{{ url_for('static', filename='images/Prism.png') }}" alt="PhilRice" class="small-logo">
-            <span class="tooltip">PRiSM</span>
+            <span class="tooltip1">PRiSM</span>
             </div>
         </div>
         </div>
@@ -525,13 +533,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const valueElement = document.getElementById(valueId);
 
         if (labelElement) {
-            labelElement.textContent = labelText;
+            labelElement.textContent = labelText; // label can remain as textContent
         } else {
             console.warn(`Label element with ID "${labelId}" not found.`);
         }
 
         if (valueElement) {
-            valueElement.textContent = valueText;
+            // Use innerHTML to render the arrow and styled text
+            valueElement.innerHTML = valueText;
         } else {
             console.warn(`Value element with ID "${valueId}" not found.`);
         }
@@ -588,13 +597,16 @@ document.addEventListener("DOMContentLoaded", function () {
         updateKPI("kpi-1-label", "kpi-1-value", "Top Performing Municipality:", topMunicipality);
         updateKPI("kpi-2-label", "kpi-2-value", "Lowest Performing Municipality:", lowestMunicipality);
         updateKPI("kpi-4-label", "kpi-4-value", "Municipalities Below Avg Rice Yield:", belowAverageCount);
+
+        const AverageYield = avgYield.toFixed(2);
+        updateKPITooltipHistorical(topMunicipality, lowestMunicipality, AverageYield, belowAverageCount)
     }
 
     function updateMunicipalityKPIs(selectedMunicipality) {
         updateKPI("kpi-1-label", "kpi-1-value", "Avg Municipality Rice Yield:", "");
         updateKPI("kpi-2-label", "kpi-2-value", "Laguna Yield Rank:", "");
         updateKPI("kpi-3-label", "kpi-3-value", "% Above Laguna Avg:", "");
-        updateKPI("kpi-4-label", "kpi-4-value", "% Change vs. Previous Season:", "");
+        updateKPI("kpi-4-label", "kpi-4-value", "% Change from Previous Season:", "");
 
         // Filter data for the selected municipality
         const municipalityData = window.historicalDataGlobal.filter(item => item.municipality.toUpperCase() === selectedMunicipality.toUpperCase());
@@ -606,7 +618,7 @@ document.addEventListener("DOMContentLoaded", function () {
             updateKPI("kpi-1-label", "kpi-1-value", "Avg Municipality Rice Yield:", "No Data");
             updateKPI("kpi-2-label", "kpi-2-value", "Laguna Yield Rank:", "No Data");
             updateKPI("kpi-3-label", "kpi-3-value", "% Above Laguna Avg:", "No Data");
-            updateKPI("kpi-4-label", "kpi-4-value", "% Change vs. Previous Season:", "No Data");
+            updateKPI("kpi-4-label", "kpi-4-value", "% Change from Previous Season:", "No Data");
             return;
         }
 
@@ -642,13 +654,40 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("Avg Municipality Rice Yield:", avgMunicipalityYield);
         console.log("Laguna Yield Rank:", municipalityRank);
         console.log("% Above Laguna Avg:", percentAboveLagunaAvg);
-        console.log("% Change vs. Previous Season:", percentChange);
+        console.log("% Change from Previous Season:", percentChange);
+
+        // Determine the arrow and color for the percentage change
+        let arrow = '';
+        let color = '';
+        if (percentChange !== "No Data") {
+            if (percentChange > 0) {
+                arrow = '▲';
+                color = 'green';
+            } else if (percentChange < 0) {
+                arrow = '▼';
+                color = 'red';
+            }
+        }
+
+        // *** THIS IS THE MODIFIED LINE ***
+        // Format the percentage change string with the arrow on the right
+        const percentChangeText = percentChange === "No Data" 
+            ? percentChange 
+            : `${percentChange.toFixed(2)}% <span style="color: ${color};">${arrow}</span>`;
 
         // Update the KPI elements
         updateKPI("kpi-1-label", "kpi-1-value", "Avg Municipality Rice Yield:", `${avgMunicipalityYield.toFixed(2)} t/ha`);
         updateKPI("kpi-2-label", "kpi-2-value", "Laguna Yield Rank:", `${getOrdinalSuffix(municipalityRank)} of ${lagunaYields.length}`);
         updateKPI("kpi-3-label", "kpi-3-value", "% Above Laguna Avg:", `${percentAboveLagunaAvg.toFixed(2)}%`);
-        updateKPI("kpi-4-label", "kpi-4-value", "% Change vs. Previous Season:", `${percentChange === "No Data" ? percentChange : percentChange.toFixed(2) + "%"}`);
+        updateKPI("kpi-4-label", "kpi-4-value", "% Change from Previous Season:", percentChangeText);
+
+        updateKPITooltipMunicipality(
+            avgMunicipalityYield.toFixed(2), // averageYield
+            municipalityRank, // rank
+            lagunaYields.length, // total
+            percentAboveLagunaAvg, // % above Laguna avg
+            percentChange === "No Data" ? null : percentChange // % change from previous season
+        );
     }
 
     function getOrdinalSuffix(n) {
@@ -918,6 +957,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Update kpi-4 element
         updateKPI("kpi-4-label", "kpi-4-value", "Municipalities Below Avg Rice Yield:", belowAverageCount);
+
+        const AverageYield= avgYield.toFixed(2);
+        updateKPITooltip(topMunicipality, lowestMunicipality, AverageYield, belowAverageCount)
     }
 
     function updateRealTimeTable(yieldData) {
@@ -2259,6 +2301,252 @@ document.addEventListener("DOMContentLoaded", function () {
 
             html2pdf().set(opt).from(element).save();
         }
+
+        function updateKPITooltip(topMunicipality, lowestMunicipality, averageYield, belowAverageCount) {
+            // KPI CARD 1 – Top Performing Municipality
+            const tooltip1 = `${topMunicipality} ranks highest in predicted average <br>
+                              rice yield across Laguna, reflecting optimal growing <br>
+                              conditions, efficient farming practices, or access to <br>
+                              advanced agricultural support.`;
+            document.getElementById("kpi-1-tooltip").innerHTML = tooltip1;
+
+            // KPI CARD 2 – Lowest Performing Municipality
+            const tooltip2 = `Identified as the lowest-performing municipality based <br>
+                              on predicted rice yield, highlighting a need for targeted <br>
+                              interventions to address production constraints and <br>
+                              improve agricultural outcomes.`;
+            document.getElementById("kpi-2-tooltip").innerHTML = tooltip2;
+
+            // KPI CARD 3 – Average Yield Description
+            let tooltip3 = "";
+            const avg = parseFloat(averageYield);
+
+            if (avg < 0.75) {
+                tooltip3 = `With a predicted average yield of ${averageYield} t/ha, <br>
+                            this shows a low yield, which may indicate challenges <br>
+                            such as poor soil quality, limited access to inputs, or <br>
+                            unfavorable climate conditions. Strategic interventions <br>
+                            are likely needed to enhance productivity.`;
+            } else if (avg >= 0.75 && avg <= 1.5) {
+                tooltip3 = `With a predicted average yield of ${averageYield} t/ha, <br>
+                            this shows a moderate yield. While production is stable, <br>
+                            there remains potential for improvement through optimized <br>
+                            resource use and targeted support for farmers.`;
+            } else if (avg > 1.5 && avg <= 2.25) {
+                tooltip3 = `With a predicted average yield of ${averageYield} t/ha, <br>
+                            this shows a good yield, reflecting effective agricultural <br>
+                            practices and relatively favorable growing conditions. <br>
+                            Sustained support could further elevate productivity.`;
+            } else if (avg > 2.25) {
+                tooltip3 = `With a predicted average yield of ${averageYield} t/ha, <br>
+                            this shows an excellent yield, indicating high efficiency <br>
+                            in rice cultivation, possibly due to advanced technologies, <br>
+                            good input management, and ideal environmental conditions.`;
+            }
+
+            document.getElementById("kpi-3-tooltip").innerHTML = tooltip3;
+
+            // KPI CARD 4 – Below Average Municipalities
+            const tooltip4 = `A total of ${belowAverageCount} municipalities are <br>
+                              performing below the provincial average rice yield, <br>
+                              indicating potential disparities in farming efficiency, <br>
+                              resource availability, or environmental conditions.`;
+            document.getElementById("kpi-4-tooltip").innerHTML = tooltip4;
+        }
+
+        function updateKPITooltipHistorical(topMunicipality, lowestMunicipality, averageYield, belowAverageCount) {
+            // KPI CARD 1 – Top Performing Municipality
+            const tooltip1 = `${topMunicipality} ranks highest in predicted average <br>
+                              rice yield across Laguna, reflecting optimal growing <br>
+                              conditions, efficient farming practices, or access to <br>
+                              advanced agricultural support.`;
+            document.getElementById("kpi-1-tooltip").innerHTML = tooltip1;
+
+            // KPI CARD 2 – Lowest Performing Municipality
+            const tooltip2 = `Identified as the lowest-performing municipality based <br>
+                              on predicted rice yield, highlighting a need for targeted <br>
+                              interventions to address production constraints and <br>
+                              improve agricultural outcomes.`;
+            document.getElementById("kpi-2-tooltip").innerHTML = tooltip2;
+
+            // KPI CARD 3 – Average Yield Description
+            let tooltip3 = "";
+            const avg = parseFloat(averageYield);
+
+            if (avg < 3) {
+                tooltip3 = `With a predicted average yield of ${averageYield} t/ha, <br>
+                            this shows a low yield, which may indicate challenges <br>
+                            such as poor soil quality, limited access to inputs, or <br>
+                            unfavorable climate conditions. Strategic interventions <br>
+                            are likely needed to enhance productivity.`;
+            } else if (avg >= 3 && avg <= 4) {
+                tooltip3 = `With a predicted average yield of ${averageYield} t/ha, <br>
+                            this shows a moderate yield. While production is stable, <br>
+                            there remains potential for improvement through optimized <br>
+                            resource use and targeted support for farmers.`;
+            } else if (avg > 4 && avg <= 5) {
+                tooltip3 = `With a predicted average yield of ${averageYield} t/ha, <br>
+                            this shows a good yield, reflecting effective agricultural <br>
+                            practices and relatively favorable growing conditions. <br>
+                            Sustained support could further elevate productivity.`;
+            } else if (avg > 5) {
+                tooltip3 = `With a predicted average yield of ${averageYield} t/ha, <br>
+                            this shows an excellent yield, indicating high efficiency <br>
+                            in rice cultivation, possibly due to advanced technologies, <br>
+                            good input management, and ideal environmental conditions.`;
+            }
+
+            document.getElementById("kpi-3-tooltip").innerHTML = tooltip3;
+
+            // KPI CARD 4 – Below Average Municipalities
+            const tooltip4 = `A total of ${belowAverageCount} municipalities are <br>
+                              performing below the provincial average rice yield, <br>
+                              indicating potential disparities in farming efficiency, <br>
+                              resource availability, or environmental conditions.`;
+            document.getElementById("kpi-4-tooltip").innerHTML = tooltip4;
+        }
+
+        function updateKPITooltipMunicipality(averageYield, rank, total, percentAboveLagunaAvg, percentChange) {
+            const tooltip1 = document.getElementById("kpi-1-tooltip");
+            const tooltip2 = document.getElementById("kpi-2-tooltip");
+            const tooltip3 = document.getElementById("kpi-3-tooltip");
+            const tooltip4 = document.getElementById("kpi-4-tooltip");
+
+            // KPI 1 – Average Yield Tooltip
+            let avg = parseFloat(averageYield);
+            if (avg < 3) {
+                tooltip1.innerHTML = `With a predicted average yield of ${averageYield} t/ha, <br>
+                                      this shows a low yield, which may indicate challenges <br>
+                                      such as poor soil quality, limited access to inputs, or <br>
+                                      unfavorable climate conditions. Strategic interventions <br>
+                                      are likely needed to enhance productivity.`;
+            } else if (avg >= 3 && avg < 4) {
+                tooltip1.innerHTML = `With a predicted average yield of ${averageYield} t/ha, <br>
+                                      this shows a moderate yield. While production is stable, <br>
+                                      there remains potential for improvement through optimized <br>
+                                      resource use and targeted support for farmers.`;
+            } else if (avg >= 4 && avg <= 5) {
+                tooltip1.innerHTML = `With a predicted average yield of ${averageYield} t/ha, <br>
+                                      this shows a good yield, reflecting <br>
+                                      effective agricultural practices and relatively favorable <br>
+                                      growing conditions. Sustained support could further elevate <br>
+                                      productivity.`;
+            } else if (avg > 5) {
+                tooltip1.innerHTML = `With a predicted average yield of ${averageYield} t/ha, this <br>
+                                      shows an excellent yield, indicating high <br>
+                                      efficiency in rice cultivation, possibly due to advanced <br>
+                                      technologies, good input management, and ideal environmental <br>
+                                      conditions.`;
+            }
+
+            // KPI 2 – Rank Tooltip
+            if (rank >= 1 && rank <= 5) {
+                tooltip2.innerHTML = `This municipality ranks ${rank}th out of ${total} <br>
+                                      provinces in predicted average <br>
+                                      rice yield, placing it among the top-performing regions. <br>
+                                      This suggests well-established agricultural practices, <br>
+                                      favorable conditions, or strong institutional support.`;
+            } else if (rank >= 6 && rank <= 15) {
+                tooltip2.innerHTML = `This municipality ranks ${rank}th out of ${total} <br>
+                                      provinces, indicating moderate performance <br>
+                                      relative to other regions. There is room for  <br>
+                                      improvement through enhanced resource access, <br>
+                                      training, and infrastructure development.`;
+            } else {
+                tooltip2.innerHTML = `This municipality ranks ${rank}th out of ${total} <br>
+                                      provinces, showing a lower <br>
+                                      average yield compared to most regions. This may <br>
+                                      highlight systemic challenges such as climate issues, <br>
+                                     limited access to inputs, or gaps in agricultural <br>
+                                     support services.`;
+            }
+
+            // KPI 3 – % Above Laguna Average Tooltip
+            let above = parseFloat(percentAboveLagunaAvg);
+            if (above > 0) {
+                tooltip3.innerHTML = `This municipality yields ${above.toFixed(2)}% above <br>
+                                     the Laguna provincial average, reflecting relatively <br>
+                                     strong productivity that may stem from favorable <br>
+                                     conditions or efficient farming practices.`;
+            } else if (above < 0) {
+                tooltip3.innerHTML = `This municipality yields ${Math.abs(above).toFixed(2)}% <br>
+                                      below the Laguna provincial average, suggesting opportunities  <br>
+                                      foryield improvement through targeted interventions or <br>
+                                      resource optimization.`;
+            } else {
+                tooltip3.innerHTML = `This municipality's average rice yield is equal to <br>
+                                      the provincial average, indicating performance that <br>
+                                      aligns with overall Laguna trends.`;
+            }
+
+            // KPI 4 – % Change from Previous Season Tooltip
+            if (percentChange === null) {
+                tooltip4.innerHTML = `No data available to compare with the previous season.`;
+            } else if (percentChange > 0) {
+                tooltip4.innerHTML = `This municipality's average rice yield has increased by <br>
+                                      ${percentChange.toFixed(2)}% compared to the previous season.<br>
+                                      This improvement may reflect better weather conditions, <br>
+                                      improved practices, or increased access to resources.`;        
+            } else if (percentChange < 0) {
+                tooltip4.innerHTML = `This municipality's average rice yield has decreased by <br>
+                                      ${Math.abs(percentChange).toFixed(2)}% compared to the previous season. <br>
+                                      This decline may be due to environmental stress, reduced <br>
+                                      input access, or other local challenges affecting productivity.`;
+            } else {
+                tooltip4.innerHTML = `This municipality's rice yield shows no change from the previous <br>
+                                      season, suggesting consistent performance. There may still be <br>
+                                      opportunities for optimization.`;
+            }
+        }
+
+
+        function calculateSeasonAndPhase(date) {
+            const month = date.getMonth(); // 0-indexed (0 for Jan, 11 for Dec)
+            const day = date.getDate();   // 1-indexed day of the month
+
+            let season = '';
+            let phase = 0;
+
+            // Determine if it's the Wet Season based on the defined date ranges.
+            // Wet season: March 16 (month 2) – September 15 (month 8)
+            const isWetSeason = (month === 2 && day >= 16) ||   // From March 16 onwards
+                                (month >= 3 && month <= 7) ||   // April, May, June, July, August (months 3-7)
+                                (month === 8 && day <= 15);     // Up to September 15
+
+            if (isWetSeason) {
+                season = 'Wet';
+                // Wet season phases
+                if ((month === 2 && day >= 16) || month === 3 || (month === 4 && day <= 15)) {
+                    // Phase 1: March 16 - May 15
+                    phase = 1;
+                } else if ((month === 4 && day >= 16) || month === 5 || (month === 6 && day <= 15)) {
+                    // Phase 2: May 16 - July 15
+                    phase = 2;
+                } else if ((month === 6 && day >= 16) || month === 7 || (month === 8 && day <= 15)) {
+                    // Phase 3: July 16 - September 15
+                    phase = 3;
+                }
+            } else {
+                season = 'Dry';
+                // Dry season phases (when not Wet season)
+                if ((month === 8 && day >= 16) || month === 9 || (month === 10 && day <= 15)) {
+                    // Phase 1: September 16 - November 15
+                    phase = 1;
+                } else if ((month === 10 && day >= 16) || month === 11 || (month === 0 && day <= 15)) {
+                    // Phase 2: November 16 - January 15 (month 0 is January)
+                    phase = 2;
+                } else if ((month === 0 && day >= 16) || month === 1 || (month === 2 && day <= 15)) {
+                    // Phase 3: January 16 - March 15 (month 1 is February, month 2 is March)
+                    phase = 3;
+                }
+            }
+
+            return { season, phase };
+        }
+
+
+
+
 
 
 
