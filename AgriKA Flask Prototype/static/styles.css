@@ -1421,4 +1421,18 @@ html, body {
     margin-bottom: 10px;
 }
 
+#actual-vs-predicted-container {
+    height: 370px;
+    width: 100%;
+    flex-grow: 0;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    overflow: hidden;
+    display: block;
+    justify-content: center;
+    background-color: #f4f4f4;
+    margin-bottom: 10px;
+}
+
 

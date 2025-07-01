@@ -52,7 +52,7 @@
             </li>
             <li>
                 <a href="{{ url_for('dashboard') }}">
-                    <span class="nav-label">DATA ANALYTICS</span> <!-- Added Analytics Nav Update -->
+                    <span class="nav-label">DATA</span> <!-- Added Analytics Nav Update -->
                 </a>
             </li>
           </ul>
@@ -74,6 +74,11 @@
                 <!-- Real-Time Content Section -->
                 <div id="realtime-content">
                     <div id="sticky-container">
+                        <div class="dropdown-container" style="display: none;">
+                            <input type="text"  id="municipality-search" placeholder="Select municipality" onfocus="showDropdown()" oninput="filterDropdown()" onkeydown="navigateDropdown(event)" autocomplete="off" >
+                            <span style="display: none;" id="clear-search" onclick="clearSearch()">❌</span>
+                            <div  style="display: none;" id="municipality-dropdown" class="dropdown-content"></div>
+                        </div> 
                         <div id="toggle-container">
                         
                         <!-- Graph Toggle Dropdown for Real-Time View -->
@@ -88,11 +93,7 @@
                             <option value="desc">High to Low</option>
                         </select> 
                         <!-- Municipality Search for Real time -->
-                        <div class="dropdown-container" style="display: none;">
-                            <input type="text" style="display: none;" id="municipality-search" placeholder="Select municipality" onfocus="showDropdown()" oninput="filterDropdown()" onkeydown="navigateDropdown(event)" autocomplete="off" >
-                            <span style="display: none;" id="clear-search" onclick="clearSearch()">❌</span>
-                            <div  style="display: none;" id="municipality-dropdown" class="dropdown-content"></div>
-                        </div>         
+                                
                     </div>
                     
                     </div>
@@ -108,6 +109,44 @@
                                 <tr>
                                     <th>Municipality</th>
                                     <th>Yield (t/ha)</th>  <!-- update ni chan -->
+                                </tr>
+                           </thead>
+                           <tbody>
+                                {% for row in realtime_yield_data %}
+                                <tr>
+                                    <td>{{ row.municipality }}</td>
+                                    <td>{{ row.yield }}</td>
+                                </tr>
+                                {% endfor %}
+                           </tbody>
+                        </table>
+                      </div>
+                      <!-- Yield Table Container for Real-Time Data (initially hidden) -->
+                    <div id="yield-table-container" style="display: none;">
+                        <table id="data-table" class="styled-table data-table">
+                           <thead>
+                                <tr>
+                                    <th>Municipality</th>
+                                    <th>Yield (t/ha)</th>  <!-- update ni chan -->
+                                </tr>
+                           </thead>
+                           <tbody>
+                                {% for row in realtime_yield_data %}
+                                <tr>
+                                    <td>{{ row.municipality }}</td>
+                                    <td>{{ row.yield }}</td>
+                                </tr>
+                                {% endfor %}
+                           </tbody>
+                        </table>
+                      </div>
+                     <!-- EDIT NOW PA LAGAY HISTORICAL NG MUNICIPALITY APPEAR ONLY WHEN MUNICIPALITY IS CLICKED-->
+                      <div id="yield-table-container-his" style="display: none;">
+                        <table id="data-table" class="styled-table data-table">
+                           <thead>
+                                <tr>
+                                    <th>Municipality</th>
+                                    <th>Yield (t/ha)</th>  
                                 </tr>
                            </thead>
                            <tbody>
@@ -140,7 +179,7 @@
                             </select>
 
                             <!-- Year Selection Dropdown -->
-                            <select id="year-dropdown-his">
+                            <select id="year-dropdown-his" style="display: none;">
                                 <option value="2024">2024</option>
                                 <option value="2023">2023</option>
                                 <option value="2022">2022</option>
@@ -151,7 +190,7 @@
                             </select>
 
                             <!-- Season Selection Dropdown -->
-                            <select id="season-dropdown-his">
+                            <select id="season-dropdown-his" style="display: none;">
                                 <option value="season1">Wet Season</option> <!-- Updated season names here -Zoe -->
                                 <option value="season2">Dry Season</option>
                             </select>
@@ -233,7 +272,7 @@
                 </div>
                 <div class="info-item">
                     <span class="label">Updated Since:</span>
-                    <span class="value">06-01-2025</span>
+                    <span class="value">06-20-2025</span>
                 </div>
                 </div>
 
@@ -254,11 +293,11 @@
                 <div id="season-radio-group" style="display: none;">
                     <label style="font-weight: bold; margin-right: 10px; font-size: small;">Season:</label>
                     <label class="season-option">
-                        <input type="radio" name="season" value="season2" checked />
+                        <input type="radio" name="season" value="season2"  />
                         Dry
                     </label>
                     <label class="season-option">
-                        <input type="radio" name="season" value="season1" />
+                        <input type="radio" name="season" value="season1" checked/>
                         Wet
                     </label>
                 </div>
@@ -298,7 +337,7 @@
                 </div>
             </div>
             <!-- ACTUAL VS PREDICTED CHART Section --> 
-            <div id="actual-vs-predicted-container" style="display: none;">
+            <div id="actual-vs-predicted-container" style="display: flex;">
                 <div>
                     <canvas id="actual-vs-predicted-chart"></canvas>
                 </div>
@@ -309,6 +348,12 @@
                     <canvas id="yieldPieChart" width="350" height="350"></canvas>
                 </div>
             </div>
+            <!-- 
+            
+            actual-vs-predicted
+            
+            --> 
+            
             <!-- AGGREGATED TREND CHART Section --> 
             <div id="aggregated-trend-chart-button-container" style="display: none;">
                 <button id="aggregated-trend-chart-button" onclick="window.location.href='/multi_year'">Multi-Line Chart</button>
@@ -415,6 +460,7 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById('municipality-search-his').value = municipalityClicked;
             document.getElementById("linegraph-container").style.display = "flex";
             document.getElementById("pie-chart-container").style.display = "none";
+            document.getElementById("actual-vs-predicted-container").style.display = "none";
             document.getElementById("aggregated-trend-chart-button-container").style.display = "flex";
         
             document.getElementById("line-chart-container").style.display = "block";
@@ -467,6 +513,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("municipality-seasons-bar-chart-container").style.display = "none";
         document.getElementById("linegraph-container").style.display = "none";
         document.getElementById("pie-chart-container").style.display = "flex";
+        document.getElementById("actual-vs-predicted-container").style.display = "flex";
         document.getElementById("aggregated-trend-chart-button-container").style.display = "none";
         document.getElementById("trendchart-container").style.display = "none";
         document.getElementById("line-chart-container").style.display = "none";
@@ -499,6 +546,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Ensure the line chart container is visible
         document.getElementById("linegraph-container").style.display = "flex";
         document.getElementById("pie-chart-container").style.display = "none";
+        document.getElementById("actual-vs-predicted-container").style.display = "none";
         document.getElementById("aggregated-trend-chart-button-container").style.display = "flex";
         document.getElementById('season-radio-group').style.display = "flex";
         document.getElementById('info-bar').style.display = "none";
@@ -1578,6 +1626,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
         let activeTab = document.querySelector(".hist-toggle-btn.active")?.id; // Ensure it exists
         let municipalityInput = document.getElementById("municipality-search-his").value.trim()
+        
 
         console.log("Active tab:", activeTab); // Debugging
         console.log("Municipality search:", municipalityInput); // Debugging
@@ -1594,8 +1643,21 @@ document.addEventListener("DOMContentLoaded", function () {
             ///slider and radio disabled
         }
 
+        
         // 📌 2️⃣ Handle Realtime & Historical Toggle Logic
         if (activeTab === "realtime-btn") {
+            let municipalityInput1 = document.getElementById("municipality-search").value.trim()
+            if (municipalityInput1) {
+                let formattedMunicipality = municipalityInput1.replace(/\s+/g, "_").toLowerCase();
+                mapFrame.src = `/static/map_${formattedMunicipality}.html`;
+                console.log("Updated map src:", mapFrame.src); // Debugging
+                return; // Stop function here if municipality is selected
+
+                //disableYearAndSeasonControls()
+
+                ///slider and radio disabled
+            }
+
             mapFrame.src = "{{ url_for('static', filename='map.html') }}";
         } else if (activeTab === "historical-btn") {
             //let yearDropdown = document.getElementById("year-dropdown-his");
@@ -1982,11 +2044,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const actualVsPredictedChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+                labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024'],
                 datasets: [
                     {
                         label: 'Actual Yield',
-                        data: [3.2, 3.5, 3.8, 4.0, 4.1, 4.3, 4.5, 4.6],
+                        data: [3.98, 4.34, 4.15, 4.26, 3.76, 4.5, 4.5, 4.49],
                         borderColor: '#1b499f',
                         backgroundColor: 'rgba(27, 73, 159, 0.1)',
                         tension: 0.3,
@@ -1994,7 +2056,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     },
                     {
                         label: 'Predicted Yield',
-                        data: [3.0, 3.4, 3.9, 4.2, 4.3, 4.4, 4.6, 4.8],
+                        data: [3.43, 4.58, 4.30, 3.86, 4.25, 3.90, 4.26, 4.1],
                         borderColor: '#ffc91f',
                         backgroundColor: 'rgba(255, 201, 31, 0.1)',
                         tension: 0.3,
@@ -2011,7 +2073,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     },
                     title: {
                         display: true,
-                        text: "Laguna's Predicted vs Actual Yield (2018–2025)"
+                        text: "Laguna's Predicted vs Actual Yield (2018–2024)"
                     }
                 },
                 scales: {
@@ -2109,7 +2171,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Yield Distribution',
+                        label: "Laguna's Real-Time Average Rice Yield Distribution ",
                         data: values,
                         backgroundColor: colors,
                         borderColor: '#fff',
@@ -2124,7 +2186,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         },
                         title: {
                             display: true,
-                            text: 'Yield Distribution',
+                            text: "Laguna's Real-Time Average Rice Yield Distribution ",
                             font: {
                                 size: 18
                             },
